@@ -42,6 +42,9 @@ const NavBar = () => {
           <a href="#demo" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
             Demo
           </a>
+          <a href="#download" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
+            Download
+          </a>
           <a href="#about" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors">
             About
           </a>
@@ -51,7 +54,7 @@ const NavBar = () => {
           <Button variant="ghost" size="sm" className="hidden sm:flex">
             Sign In
           </Button>
-          <Button size="sm" className="bg-brand-blue hover:bg-brand-blue/90">
+          <Button size="sm" className="bg-brand-blue hover:bg-brand-blue/90" onClick={() => window.location.href = '#download'}>
             Download
           </Button>
         </div>
