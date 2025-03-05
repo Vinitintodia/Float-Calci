@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				brand: {
+					blue: "#0EA5E9",
+					gray: {
+						light: "#F6F6F7",
+						medium: "#8E9196",
+						dark: "#1A1F2C"
+					},
+					purple: {
+						light: "#E5DEFF",
+						medium: "#9b87f5",
+						dark: "#6E59A5"
+					}
 				}
 			},
 			borderRadius: {
@@ -70,25 +84,56 @@ export default {
 			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'pulse-subtle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				'fade-in-up': {
+					'0%': { opacity: '0', transform: 'translateY(20px)' },
+					'100%': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'fade-in-right': {
+					'0%': { opacity: '0', transform: 'translateX(-20px)' },
+					'100%': { opacity: '1', transform: 'translateX(0)' }
+				},
+				'blur-in': {
+					'0%': { opacity: '0', filter: 'blur(10px)' },
+					'100%': { opacity: '1', filter: 'blur(0)' }
+				},
+				'scale-in': {
+					'0%': { transform: 'scale(0.9)', opacity: '0' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 6s ease-in-out infinite',
+				'pulse-subtle': 'pulse-subtle 4s ease-in-out infinite',
+				'fade-in': 'fade-in 0.6s ease-out',
+				'fade-in-up': 'fade-in-up 0.8s ease-out',
+				'fade-in-right': 'fade-in-right 0.8s ease-out',
+				'blur-in': 'blur-in 0.8s ease-out',
+				'scale-in': 'scale-in 0.5s ease-out'
+			},
+			fontFamily: {
+				sans: ["SF Pro Display", "SF Pro", "system-ui", "sans-serif"],
+				mono: ["SF Mono", "monospace"]
 			}
 		}
 	},
