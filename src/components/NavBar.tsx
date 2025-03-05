@@ -18,6 +18,14 @@ const NavBar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [scrolled]);
   
+  const scrollToDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const downloadSection = document.getElementById('download');
+    if (downloadSection) {
+      downloadSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
   return (
     <header 
       className={cn(
@@ -54,7 +62,11 @@ const NavBar = () => {
           <Button variant="ghost" size="sm" className="hidden sm:flex">
             Sign In
           </Button>
-          <Button size="sm" className="bg-brand-blue hover:bg-brand-blue/90" onClick={() => window.location.href = '#download'}>
+          <Button 
+            size="sm" 
+            className="bg-brand-blue hover:bg-brand-blue/90" 
+            onClick={scrollToDownload}
+          >
             Download
           </Button>
         </div>

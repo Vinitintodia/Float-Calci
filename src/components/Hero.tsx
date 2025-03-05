@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui-custom/GlassCard";
@@ -6,6 +5,22 @@ import AnimatedText from "@/components/ui-custom/AnimatedText";
 import { ArrowRight } from "lucide-react";
 
 const Hero = () => {
+  const scrollToDownload = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const downloadSection = document.getElementById('download');
+    if (downloadSection) {
+      downloadSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
+  const scrollToDemo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const demoSection = document.getElementById('demo');
+    if (demoSection) {
+      demoSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+  
   return (
     <section className="relative min-h-screen w-full overflow-hidden pt-24 pb-20 flex items-center justify-center bg-mesh-gradient">
       {/* Background elements */}
@@ -37,10 +52,19 @@ const Hero = () => {
           />
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            <Button size="lg" className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8">
+            <Button 
+              size="lg" 
+              className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8"
+              onClick={scrollToDownload}
+            >
               Download Beta
             </Button>
-            <Button variant="outline" size="lg" className="rounded-full px-6 group">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="rounded-full px-6 group"
+              onClick={scrollToDemo}
+            >
               Watch Demo
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>

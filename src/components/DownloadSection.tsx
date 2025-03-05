@@ -1,11 +1,19 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui-custom/GlassCard";
 import AnimatedText from "@/components/ui-custom/AnimatedText";
 import { Download, Laptop, ArrowRight, Github } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const DownloadSection = () => {
+  const handleDownload = (platform: string) => {
+    toast({
+      title: "Download Started",
+      description: `VoiceCalc for ${platform} is being downloaded. Please check your downloads folder.`,
+      duration: 5000,
+    });
+  };
+
   return (
     <section id="download" className="py-24 relative overflow-hidden">
       <div className="absolute top-40 left-[15%] w-64 h-64 rounded-full bg-brand-blue/10 filter blur-3xl"></div>
@@ -48,10 +56,16 @@ const DownloadSection = () => {
               </p>
               
               <div className="space-y-4 mt-auto">
-                <Button className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white">
+                <Button 
+                  className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white"
+                  onClick={() => handleDownload("macOS (Intel)")}
+                >
                   Download for macOS (Intel)
                 </Button>
-                <Button className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white">
+                <Button 
+                  className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white"
+                  onClick={() => handleDownload("macOS (Apple Silicon)")}
+                >
                   Download for macOS (Apple Silicon)
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
@@ -81,7 +95,11 @@ const DownloadSection = () => {
                 <p className="text-brand-blue">python build.py</p>
               </div>
               
-              <Button variant="outline" className="w-full group mt-auto">
+              <Button 
+                variant="outline" 
+                className="w-full group mt-auto"
+                onClick={() => window.open("https://github.com/voicecalc/voicecalc-macos", "_blank")}
+              >
                 View Source on GitHub
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
