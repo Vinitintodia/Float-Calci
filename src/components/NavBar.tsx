@@ -2,13 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/clerk-react";
-import { useToast } from "@/hooks/use-toast";
 
 const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const { user, isSignedIn } = useUser();
-  const { toast } = useToast();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -27,15 +23,6 @@ const NavBar = () => {
     const downloadSection = document.getElementById('download');
     if (downloadSection) {
       downloadSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-  
-  const handleProfileClick = () => {
-    if (isSignedIn) {
-      toast({
-        title: "Welcome back!",
-        description: `Signed in as ${user?.primaryEmailAddress?.emailAddress}`,
-      });
     }
   };
   
@@ -72,43 +59,16 @@ const NavBar = () => {
         </nav>
         
         <div className="flex items-center gap-4">
-          {isSignedIn ? (
-            <div onClick={handleProfileClick}>
-              <UserButton 
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    userButtonAvatarBox: "w-8 h-8"
-                  }
-                }}
-              />
-            </div>
-          ) : (
-            <>
-              <SignInButton mode="modal">
-                <Button variant="ghost" size="sm" className="hidden sm:flex">
-                  Sign In
-                </Button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <Button 
-                  size="sm" 
-                  className="bg-brand-blue hover:bg-brand-blue/90" 
-                >
-                  Join Beta
-                </Button>
-              </SignUpButton>
-            </>
-          )}
-          {isSignedIn && (
-            <Button 
-              size="sm" 
-              className="bg-brand-blue hover:bg-brand-blue/90" 
-              onClick={scrollToDownload}
-            >
-              Download
-            </Button>
-          )}
+          <Button variant="ghost" size="sm" className="hidden sm:flex">
+            Sign In
+          </Button>
+          <Button 
+            size="sm" 
+            className="bg-brand-blue hover:bg-brand-blue/90" 
+            onClick={scrollToDownload}
+          >
+            Download
+          </Button>
         </div>
       </div>
     </header>

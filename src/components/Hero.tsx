@@ -1,15 +1,10 @@
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui-custom/GlassCard";
 import AnimatedText from "@/components/ui-custom/AnimatedText";
 import { ArrowRight } from "lucide-react";
-import { useUser } from "@clerk/clerk-react";
-import { Link } from "react-router-dom";
 
 const Hero = () => {
-  const { isSignedIn, user } = useUser();
-  
   const scrollToDownload = (e: React.MouseEvent) => {
     e.preventDefault();
     const downloadSection = document.getElementById('download');
@@ -36,12 +31,12 @@ const Hero = () => {
         <div className="space-y-4 max-w-[800px]">
           <div className="inline-block animate-fade-in-up">
             <span className="inline-flex items-center rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3 py-1 text-sm font-medium text-brand-blue">
-              {isSignedIn ? `Welcome back, ${user?.firstName || 'User'}!` : 'Introducing VoiceCalc for macOS'}
+              Introducing VoiceCalc for macOS
             </span>
           </div>
           
           <AnimatedText
-            text={isSignedIn ? "Continue Your VoiceCalc Journey" : "The Smart Calculator That Listens and Adapts"}
+            text="The Smart Calculator That Listens and Adapts"
             element="h1"
             animation="fade-in-up"
             delay={100}
@@ -49,9 +44,7 @@ const Hero = () => {
           />
           
           <AnimatedText
-            text={isSignedIn 
-              ? "Your voice-powered calculator is ready. Continue where you left off or explore new features."
-              : "Perform calculations effortlessly with voice commands. The intelligent interface appears when you need it and elegantly fades away when you don't."}
+            text="Perform calculations effortlessly with voice commands. The intelligent interface appears when you need it and elegantly fades away when you don't."
             element="p"
             animation="fade-in-up"
             delay={200}
@@ -59,46 +52,22 @@ const Hero = () => {
           />
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            {isSignedIn ? (
-              <>
-                <Button 
-                  size="lg" 
-                  className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8"
-                  onClick={scrollToDownload}
-                >
-                  Download Latest
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="rounded-full px-6 group"
-                  as={Link}
-                  to="/profile"
-                >
-                  Your Profile
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  size="lg" 
-                  className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8"
-                  onClick={scrollToDownload}
-                >
-                  Download Beta
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
-                  className="rounded-full px-6 group"
-                  onClick={scrollToDemo}
-                >
-                  Watch Demo
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </>
-            )}
+            <Button 
+              size="lg" 
+              className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8"
+              onClick={scrollToDownload}
+            >
+              Download Beta
+            </Button>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="rounded-full px-6 group"
+              onClick={scrollToDemo}
+            >
+              Watch Demo
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Button>
           </div>
         </div>
         
