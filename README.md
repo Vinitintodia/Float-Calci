@@ -24,4 +24,4 @@ A beautiful, responsive, and feature-rich **scientific calculator** built using 
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/Vinitintodia/voice-cal-vision.git
+   git clone https://github.com/Vinitintodia/voice-calc-vision.git
