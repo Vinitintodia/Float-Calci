@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GlassCard from "@/components/ui-custom/GlassCard";
 import AnimatedText from "@/components/ui-custom/AnimatedText";
-import { Calculator, BarChart3, Calculator as CalculatorIcon } from "lucide-react";
+import { Calculator, BarChart3, Calculator as CalculatorIcon, Watch } from "lucide-react";
 
 const voiceCommands = [
   { command: "Add twenty plus fifteen", result: "35" },
@@ -34,7 +34,7 @@ const AppDemo = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block mb-4">
             <span className="inline-flex items-center rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3 py-1 text-sm font-medium text-brand-blue">
-              Experience VoiceCalc
+              Experience VocieCal
             </span>
           </div>
           
@@ -57,7 +57,7 @@ const AppDemo = () => {
         <div className="max-w-4xl mx-auto">
           <Tabs defaultValue="basic" className="w-full">
             <div className="flex justify-center mb-8">
-              <TabsList className="grid w-full max-w-md grid-cols-3">
+              <TabsList className="grid w-full max-w-md grid-cols-4">
                 <TabsTrigger value="basic" className="flex items-center gap-2">
                   <CalculatorIcon className="h-4 w-4" />
                   <span>Basic</span>
@@ -69,6 +69,10 @@ const AppDemo = () => {
                 <TabsTrigger value="financial" className="flex items-center gap-2">
                   <BarChart3 className="h-4 w-4" />
                   <span>Financial</span>
+                </TabsTrigger>
+                <TabsTrigger value="watch" className="flex items-center gap-2">
+                  <Watch className="h-4 w-4" />
+                  <span>Watch</span>
                 </TabsTrigger>
               </TabsList>
             </div>
