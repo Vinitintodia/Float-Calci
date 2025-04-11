@@ -18,7 +18,7 @@ A beautiful, responsive, and feature-rich **scientific calculator** built using 
 
 ## 📸 Preview
 
-[image](https://github.com/Vinitintodia/voice-calc-vision/blob/main/public/demo.png)
+![image](https://github.com/Vinitintodia/voice-calc-vision/blob/main/public/demo.png)
 
 ## 🛠️ How to Use
 
