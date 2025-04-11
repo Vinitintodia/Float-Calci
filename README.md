@@ -18,7 +18,8 @@ A beautiful, responsive, and feature-rich **scientific calculator** built using 
 
 ## 📸 Preview
 
-![screenshot](your-screenshot-link-here)
+![screenshot](![image](https://github.com/user-attachments/assets/a4bd88c2-1561-4f73-b423-16451b82053a)
+)
 
 ## 🛠️ How to Use
 
