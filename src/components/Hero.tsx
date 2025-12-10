@@ -8,7 +8,7 @@ import { ArrowRight } from "lucide-react";
 /**
  * Hero Component
  * 
- * This is the main landing section of the VoiceCalc application.
+ * This is the main landing section of the FloatCalci application.
  * It displays the app's headline, description, call-to-action buttons,
  * and a preview of the calculator interface.
  */
@@ -23,7 +23,7 @@ const Hero = () => {
       downloadSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  
+
   /**
    * Smooth scrolls to the demo section when the Watch Demo button is clicked
    */
@@ -34,23 +34,23 @@ const Hero = () => {
       demoSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  
+
   return (
     <section className="relative min-h-screen w-full overflow-hidden pt-24 pb-20 flex items-center justify-center bg-mesh-gradient">
       {/* Background decorative elements - blurred circles for visual appeal */}
       <div className="absolute top-20 right-[10%] w-64 h-64 rounded-full bg-brand-purple-light/20 filter blur-3xl animate-pulse-subtle"></div>
       <div className="absolute bottom-20 left-[10%] w-72 h-72 rounded-full bg-brand-blue/10 filter blur-3xl animate-pulse-subtle" style={{ animationDelay: '2s' }}></div>
-      
+
       <div className="container px-4 md:px-6 flex flex-col items-center text-center z-10">
         {/* Hero content section with headline and description */}
         <div className="space-y-4 max-w-[800px]">
           {/* Badge/tag showing the product name */}
           <div className="inline-block animate-fade-in-up">
             <span className="inline-flex items-center rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3 py-1 text-sm font-medium text-brand-blue">
-              Introducing VoiceCalc for macOS
+              Introducing FloatCalci
             </span>
           </div>
-          
+
           {/* Main headline with animation */}
           <AnimatedText
             text="The Smart Calculator That Listens and Adapts"
@@ -59,30 +59,30 @@ const Hero = () => {
             delay={100}
             className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-balance leading-tight"
           />
-          
+
           {/* Subheadline/description with animation */}
           <AnimatedText
-            text="Perform calculations effortlessly with voice commands. The intelligent interface appears when you need it and elegantly fades away when you don't."
+            text="Perform calculations effortlessly with floating calculators. The intelligent interface appears when you need it and elegantly fades away when you don't."
             element="p"
             animation="fade-in-up"
             delay={200}
             className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto text-balance"
           />
-          
+
           {/* Call-to-action buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
             {/* Primary CTA - Download button */}
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8"
               onClick={scrollToDownload}
             >
               Download Beta
             </Button>
             {/* Secondary CTA - Demo button with arrow icon */}
-            <Button 
-              variant="outline" 
-              size="lg" 
+            <Button
+              variant="outline"
+              size="lg"
               className="rounded-full px-6 group"
               onClick={scrollToDemo}
             >
@@ -91,7 +91,7 @@ const Hero = () => {
             </Button>
           </div>
         </div>
-        
+
         {/* Calculator Preview Section - Shows a visual demo of the app */}
         <div className="mt-16 w-full max-w-3xl mx-auto animate-fade-in-up animate-delay-500">
           <GlassCard intensity="high" className="p-6 sm:p-8 shadow-xl">
@@ -117,19 +117,18 @@ const Hero = () => {
                   <div className="grid grid-cols-4 gap-2">
                     {/* Map through calculator keys and render buttons with appropriate styling */}
                     {["C", "±", "%", "÷", "7", "8", "9", "×", "4", "5", "6", "-", "1", "2", "3", "+", "0", ".", "="].map((key, index) => (
-                      <div 
+                      <div
                         key={index}
-                        className={`h-12 rounded-lg flex items-center justify-center text-lg ${
-                          ["C", "±", "%", "÷", "×", "-", "+", "="].includes(key) 
-                            ? "bg-brand-blue text-white" 
+                        className={`h-12 rounded-lg flex items-center justify-center text-lg ${["C", "±", "%", "÷", "×", "-", "+", "="].includes(key)
+                            ? "bg-brand-blue text-white"
                             : "bg-brand-gray-light/60 text-brand-gray-dark"
-                        }`}
+                          }`}
                       >
                         {key}
                       </div>
                     ))}
                   </div>
-                  
+
                   {/* Voice command input visualization */}
                   <div className="mt-6 p-3 bg-brand-gray-light/50 rounded-lg">
                     <div className="flex items-center">

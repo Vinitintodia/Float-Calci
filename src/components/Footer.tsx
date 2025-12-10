@@ -13,10 +13,10 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-lg bg-brand-blue flex items-center justify-center text-white font-bold">
                 VC
               </div>
-              <span className="font-medium text-lg">VoiceCalc</span>
+              <span className="font-medium text-lg">FloatCalci</span>
             </div>
             <p className="text-muted-foreground text-sm">
-              A voice-activated, context-aware calculator for macOS that adapts to your needs.
+              A floating calculator for any webpage that adapts to your needs.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-brand-gray-medium hover:text-brand-blue transition-colors">
@@ -36,7 +36,7 @@ const Footer = () => {
               </a>
             </div>
           </div>
-          
+
           <div>
             <h3 className="text-sm font-semibold mb-4">Product</h3>
             <ul className="space-y-3">
@@ -54,7 +54,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-sm font-semibold mb-4">Company</h3>
             <ul className="space-y-3">
@@ -72,16 +72,16 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          
+
           <div>
             <h3 className="text-sm font-semibold mb-4">Stay Updated</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Subscribe to our newsletter for updates and exclusive content.
             </p>
             <div className="flex gap-2">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
+              <input
+                type="email"
+                placeholder="Enter your email"
                 className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
               />
               <Button size="icon" className="bg-brand-blue hover:bg-brand-blue/90">
@@ -90,10 +90,10 @@ const Footer = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            © 2023 VoiceCalc. All rights reserved.
+            © 2023 FloatCalci. All rights reserved.
           </p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

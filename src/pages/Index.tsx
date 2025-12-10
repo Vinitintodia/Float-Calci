@@ -12,7 +12,7 @@ const Index = () => {
   const [showCalculator, setShowCalculator] = useState(false);
   const [calculatorInput, setCalculatorInput] = useState("");
   const [calculatorType, setCalculatorType] = useState<'basic' | 'scientific' | 'financial'>('basic');
-  
+
   // Function to toggle calculator visibility
   const toggleCalculator = (type: 'basic' | 'scientific' | 'financial') => {
     if (showCalculator && calculatorType === type) {
@@ -25,11 +25,11 @@ const Index = () => {
       setCalculatorInput(""); // Reset input when switching calculators
     }
   };
-  
+
   // Add a keyboard input handler
   const handleKeyboardInput = (key: string) => {
     console.log(`Key pressed: ${key}`);
-    
+
     // Process the key and update calculator input
     if (key === 'C') {
       // Clear the input
@@ -49,18 +49,37 @@ const Index = () => {
       // For all other keys, append to the input
       // But check if the resulting string would be too long
       const newInput = calculatorInput + key;
-      
+
       // Limit the input length to prevent overflow
       if (newInput.length <= 15) {
         setCalculatorInput(newInput);
       }
     }
   };
-  
+
+  // Listen for close calculator events
+  useEffect(() => {
+    const handleCloseCalculator = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const type = customEvent.detail;
+
+      // Only close if the event matches the current calculator type
+      if (type === calculatorType) {
+        setShowCalculator(false);
+      }
+    };
+
+    window.addEventListener('closeCalculator', handleCloseCalculator);
+
+    return () => {
+      window.removeEventListener('closeCalculator', handleCloseCalculator);
+    };
+  }, [calculatorType]);
+
   return (
     <div className="min-h-screen bg-white">
-      <NavBar 
-        onFloCalClick={toggleCalculator} 
+      <NavBar
+        onFloCalClick={toggleCalculator}
         isCalculatorVisible={showCalculator}
         calculatorType={calculatorType}
         onKeyboardInput={handleKeyboardInput}
@@ -71,11 +90,11 @@ const Index = () => {
       <DownloadSection />
       <Footer />
       {showCalculator && (
-        <CalculatorManager 
+        <CalculatorManager
           type={calculatorType}
-          input={calculatorInput} 
+          input={calculatorInput}
           onInputChange={setCalculatorInput}
-          onKeyboardInput={handleKeyboardInput} 
+          onKeyboardInput={handleKeyboardInput}
         />
       )}
     </div>

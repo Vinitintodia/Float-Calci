@@ -6,10 +6,10 @@ interface ScientificCalculatorProps {
   onKeyboardInput?: (key: string) => void;
 }
 
-const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ 
-  input, 
+const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
+  input,
   onInputChange,
-  onKeyboardInput 
+  onKeyboardInput
 }) => {
   // Use local state if no external state is provided
   const [expression, setExpression] = useState<string>(input || "");
@@ -17,10 +17,10 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
   const [offset, setOffset] = useState({ x: 150, y: 100 });
   const calcRef = useRef<HTMLDivElement>(null);
   const dragStart = useRef({ x: 0, y: 0 });
-  const [voiceText, setVoiceText] = useState("");
 
   // Add state for transparency
   const [isHovered, setIsHovered] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
 
   // Update local state when input prop changes
   useEffect(() => {
@@ -40,12 +40,57 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
 
   // Handle keyboard input
   useEffect(() => {
-    if (onKeyboardInput) {
-      onKeyboardInput = (key: string) => {
-        handleClick(key);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent handling if focus is elsewhere (like in an input field)
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      const key = e.key;
+
+      // Map Enter key to equals sign
+      if (key === 'Enter') {
+        handleClick('=');
+        e.preventDefault();
+        return;
+      }
+
+      // Map other keys to calculator buttons
+      const keyMap: Record<string, string> = {
+        'Escape': 'C',
+        'Backspace': '⌫',
+        'Delete': 'C',
+        '/': '/',
+        '*': '*',
+        '-': '-',
+        '+': '+',
+        '.': '.',
+        '%': '%',
+        '^': '^',
+        '(': '(',
+        ')': ')',
+        's': 'sin',
+        'c': 'cos',
+        't': 'tan',
+        'l': 'log',
+        'r': '√',
+        'p': 'π',
+        ' ': ')', // Spacebar closes bracket
       };
-    }
-  }, [onKeyboardInput]);
+
+      // Handle numeric keys and mapped keys
+      if (/^[0-9]$/.test(key) || Object.keys(keyMap).includes(key)) {
+        const mappedKey = keyMap[key] || key;
+        handleClick(mappedKey);
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [expression]); // Add expression as dependency to ensure latest state is used
 
   // Scientific calculator buttons
   const buttons = [
@@ -71,21 +116,25 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
       onInputChange?.(newValue);
     } else if (val === "=") {
       try {
-        // Handle special scientific functions
+        // Handle special scientific functions with degree-to-radian conversion
         let processedExpression = expression
-          .replace(/sin\(/g, "Math.sin(")
-          .replace(/cos\(/g, "Math.cos(")
-          .replace(/tan\(/g, "Math.tan(")
+          // Convert trig functions from degrees to radians
+          .replace(/sin\(([^)]+)\)/g, (match, p1) => `Math.sin((${p1}) * Math.PI / 180)`)
+          .replace(/cos\(([^)]+)\)/g, (match, p1) => `Math.cos((${p1}) * Math.PI / 180)`)
+          .replace(/tan\(([^)]+)\)/g, (match, p1) => `Math.tan((${p1}) * Math.PI / 180)`)
+          // Other functions
           .replace(/log\(/g, "Math.log10(")
           .replace(/ln\(/g, "Math.log(")
           .replace(/sqrt\(/g, "Math.sqrt(")
+          // Constants - be careful with 'e' to not replace it in scientific notation
           .replace(/π/g, "Math.PI")
-          .replace(/e/g, "Math.E")
+          .replace(/\be\b/g, "Math.E")  // Only replace standalone 'e'
+          // Operators
           .replace(/\^/g, "**");
-        
+
         // Safely evaluate the expression
         const result = Function('"use strict";return (' + processedExpression + ')')();
-        
+
         // Format the result
         let newValue;
         if (Number.isFinite(result)) {
@@ -95,14 +144,14 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
           } else if (Math.abs(result) > 1000000) {
             newValue = result.toExponential(6);
           } else {
-            newValue = Number.isInteger(result) 
-              ? result.toString() 
+            newValue = Number.isInteger(result)
+              ? result.toString()
               : result.toFixed(8).replace(/\.?0+$/, "");
           }
         } else {
           newValue = "Error";
         }
-        
+
         setExpression(newValue);
         onInputChange?.(newValue);
       } catch (error) {
@@ -113,21 +162,50 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
     } else if (val === "x²") {
       try {
         const num = parseFloat(expression);
-        const newValue = (num * num).toString();
-        setExpression(newValue);
-        onInputChange?.(newValue);
+        if (!isNaN(num)) {
+          const newValue = (num * num).toString();
+          setExpression(newValue);
+          onInputChange?.(newValue);
+        }
+      } catch {
+        setExpression("Error");
+        onInputChange?.("Error");
+      }
+    } else if (val === "x³") {
+      try {
+        const num = parseFloat(expression);
+        if (!isNaN(num)) {
+          const newValue = (num * num * num).toString();
+          setExpression(newValue);
+          onInputChange?.(newValue);
+        }
       } catch {
         setExpression("Error");
         onInputChange?.("Error");
       }
     } else if (val === "√") {
-      // Add sqrt function with parenthesis
+      // Add sqrt function with opening parenthesis only
       const newValue = expression + "sqrt(";
       setExpression(newValue);
       onInputChange?.(newValue);
     } else if (["sin", "cos", "tan", "log", "ln"].includes(val)) {
-      // Add function with parenthesis
+      // Add function with opening parenthesis only
       const newValue = expression + val + "(";
+      setExpression(newValue);
+      onInputChange?.(newValue);
+    } else if (val === "(") {
+      // Add opening bracket only
+      const newValue = expression + "(";
+      setExpression(newValue);
+      onInputChange?.(newValue);
+    } else if (val === "π") {
+      // Add pi constant
+      const newValue = expression + "π";
+      setExpression(newValue);
+      onInputChange?.(newValue);
+    } else if (val === "e") {
+      // Add Euler's number constant
+      const newValue = expression + "e";
       setExpression(newValue);
       onInputChange?.(newValue);
     } else {
@@ -138,9 +216,20 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
         setExpression(newValue);
         onInputChange?.(newValue);
       } else {
-        const newValue = expression + val;
-        setExpression(newValue);
-        onInputChange?.(newValue);
+        // Prevent multiple consecutive operators
+        const operators = ['+', '-', '*', '/', '%', '^'];
+        const lastChar = expression.slice(-1);
+
+        // If current input is an operator and last character is also an operator, replace it
+        if (operators.includes(val) && operators.includes(lastChar)) {
+          const newValue = expression.slice(0, -1) + val;
+          setExpression(newValue);
+          onInputChange?.(newValue);
+        } else {
+          const newValue = expression + val;
+          setExpression(newValue);
+          onInputChange?.(newValue);
+        }
       }
     }
   };
@@ -156,9 +245,28 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!dragging) return;
+
+    // Get calculator dimensions
+    const calcWidth = calcRef.current?.offsetWidth || 350;
+    const calcHeight = calcRef.current?.offsetHeight || 500;
+
+    // Calculate new position
+    let newX = e.clientX - dragStart.current.x;
+    let newY = e.clientY - dragStart.current.y;
+
+    // Apply boundary constraints
+    const minX = 0;
+    const minY = 0;
+    const maxX = window.innerWidth - calcWidth;
+    const maxY = window.innerHeight - calcHeight;
+
+    // Clamp values within boundaries
+    newX = Math.max(minX, Math.min(newX, maxX));
+    newY = Math.max(minY, Math.min(newY, maxY));
+
     setOffset({
-      x: e.clientX - dragStart.current.x,
-      y: e.clientY - dragStart.current.y,
+      x: newX,
+      y: newY,
     });
   };
 
@@ -173,37 +281,6 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
     };
   }, [dragging]);
 
-  // Voice Recognition
-  const handleVoice = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Speech Recognition not supported");
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setVoiceText(`"${transcript}"`);
-
-      // Parse scientific voice commands
-      if (transcript.toLowerCase().includes("sine of")) {
-        const angle = transcript.toLowerCase().split("sine of")[1].trim();
-        const newValue = `sin(${angle})`;
-        setExpression(newValue);
-        onInputChange?.(newValue);
-      } else if (transcript.toLowerCase().includes("cosine of")) {
-        const angle = transcript.toLowerCase().split("cosine of")[1].trim();
-        const newValue = `cos(${angle})`;
-        setExpression(newValue);
-        onInputChange?.(newValue);
-      } else if (transcript.toLowerCase().includes("square root of")) {
-        const number = transcript.toLowerCase().split("square root of")[1].trim();
-        const newValue = `√(${number})`;
-        setExpression(newValue);
-        onInputChange?.(newValue);
-      }
-    };
-    recognition.start();
-  };
 
   return (
     <div
@@ -228,114 +305,156 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({
     >
       {/* Drag Bar */}
       <div
-        onMouseDown={handleMouseDown}
         style={{
-          padding: "1rem",
+          padding: "0.75rem 1rem",
           background: isHovered ? "#f0f8ff" : "rgba(240, 248, 255, 0.7)",
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
-          fontWeight: "bold",
-          cursor: "move",
-          borderBottom: "1px solid #ddd",
+          borderBottomLeftRadius: isMinimized ? 16 : 0,
+          borderBottomRightRadius: isMinimized ? 16 : 0,
+          fontWeight: "500",
+          borderBottom: isMinimized ? "none" : "1px solid #ddd",
           display: "flex",
           alignItems: "center",
-          gap: "0.5rem",
+          justifyContent: "space-between",
           transition: "background 0.3s ease",
         }}
       >
-        <span role="img" aria-label="scientific calculator" style={{ fontSize: "1.2rem" }}>
-          📐
-        </span>
-        SciCal
-      </div>
-
-      {/* Display - Keep this fully visible */}
-      <div
-        style={{
-          padding: "1rem",
-          textAlign: "right",
-          fontSize: "1.8rem",
-          fontWeight: 600,
-          minHeight: "4rem",
-          fontFamily: "monospace",
-          overflowX: "auto",
-          whiteSpace: "nowrap",
-          backgroundColor: "rgba(255, 255, 255, 0.95)", // Keep result box clearly visible
-          borderBottom: "1px solid rgba(221, 221, 221, 0.5)",
-        }}
-      >
-        {expression || "0"}
-      </div>
-
-      {/* Buttons Grid - More transparent */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: "0.5rem",
-          padding: "1rem",
-          backgroundColor: isHovered ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.5)",
-          transition: "background-color 0.3s ease",
-        }}
-      >
-        {/* Rest of the buttons code remains the same */}
-        {buttons.flat().map((val, idx) => (
+        {/* macOS-style window controls */}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
           <button
-            key={idx}
-            onClick={() => handleClick(val)}
+            onClick={() => window.dispatchEvent(new CustomEvent('closeCalculator', { detail: 'scientific' }))}
             style={{
-              padding: "0.75rem 0.5rem",
-              fontSize: "0.9rem",
+              width: "12px",
+              height: "12px",
+              borderRadius: "50%",
+              background: "#FF5F57",
               border: "none",
-              borderRadius: 8,
-              backgroundColor: 
-                ["sin", "cos", "tan", "π", "e", "^", "√", "log", "(", ")", "x²", "x³", "EXP", "×10^", "Ans"].includes(val)
-                  ? "#e6f7ff"
-                  : ["C", "⌫", "%", "±", "/", "*", "-", "+", "="].includes(val)
-                    ? "#4da6ff"
-                    : "#f2f2f2",
-              color: 
-                ["C", "⌫", "%", "±", "/", "*", "-", "+", "="].includes(val)
-                  ? "white"
-                  : ["sin", "cos", "tan", "π", "e", "^", "√", "log", "(", ")", "x²", "x³", "EXP", "×10^", "Ans"].includes(val)
-                    ? "#0066cc"
-                    : "black",
               cursor: "pointer",
-              fontWeight: ["sin", "cos", "tan", "π", "e", "^", "√", "log", "(", ")", "x²", "x³", "EXP", "×10^", "Ans"].includes(val) ? "bold" : "normal",
+              padding: 0,
+              transition: "opacity 0.2s",
             }}
-          >
-            {val}
-          </button>
-        ))}
-      </div>
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+            title="Close"
+          />
+          <button
+            onClick={() => setIsMinimized(!isMinimized)}
+            style={{
+              width: "12px",
+              height: "12px",
+              borderRadius: "50%",
+              background: "#FFBD2E",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+            title={isMinimized ? "Maximize" : "Minimize"}
+          />
+          <button
+            style={{
+              width: "12px",
+              height: "12px",
+              borderRadius: "50%",
+              background: "#28C840",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = "0.8"}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+            title="Maximize"
+          />
+        </div>
 
-      {/* Voice Input */}
-      <div
-        style={{
-          padding: "1rem",
-          borderTop: "1px solid #ddd",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          fontStyle: "italic",
-          background: "#f9f9f9",
-          borderBottomLeftRadius: 16,
-          borderBottomRightRadius: 16,
-        }}
-      >
-        <button
-          onClick={handleVoice}
+        {/* Title - draggable area */}
+        <div
+          onMouseDown={handleMouseDown}
           style={{
-            border: "none",
-            background: "transparent",
-            cursor: "pointer",
-            fontSize: "1.5rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            cursor: "move",
+            flex: 1,
+            justifyContent: "center",
+            fontSize: "0.875rem",
+            color: "#666",
           }}
         >
-          🎤
-        </button>
-        <span>{voiceText || '"Try saying: sine of 30 degrees"'}</span>
+          Scientific Calculator
+        </div>
+
+        {/* Empty space for symmetry */}
+        <div style={{ width: "60px" }} />
       </div>
+
+      {!isMinimized && (
+        <>
+          {/* Display - Keep this fully visible */}
+          <div
+            style={{
+              padding: "1rem",
+              textAlign: "right",
+              fontSize: "1.8rem",
+              fontWeight: 600,
+              minHeight: "4rem",
+              fontFamily: "monospace",
+              overflowX: "auto",
+              whiteSpace: "nowrap",
+              backgroundColor: "rgba(255, 255, 255, 0.95)", // Keep result box clearly visible
+              borderBottom: "1px solid rgba(221, 221, 221, 0.5)",
+            }}
+          >
+            {expression || "0"}
+          </div>
+
+          {/* Buttons Grid - More transparent */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, 1fr)",
+              gap: "0.5rem",
+              padding: "1rem",
+              backgroundColor: isHovered ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.5)",
+              transition: "background-color 0.3s ease",
+            }}
+          >
+            {/* Rest of the buttons code remains the same */}
+            {buttons.flat().map((val, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleClick(val)}
+                style={{
+                  padding: "0.75rem 0.5rem",
+                  fontSize: "0.9rem",
+                  border: "none",
+                  borderRadius: 8,
+                  backgroundColor:
+                    ["sin", "cos", "tan", "π", "e", "^", "√", "log", "(", ")", "x²", "x³", "EXP", "×10^", "Ans"].includes(val)
+                      ? "#e6f7ff"
+                      : ["C", "⌫", "%", "±", "/", "*", "-", "+", "="].includes(val)
+                        ? "#4da6ff"
+                        : "#f2f2f2",
+                  color:
+                    ["C", "⌫", "%", "±", "/", "*", "-", "+", "="].includes(val)
+                      ? "white"
+                      : ["sin", "cos", "tan", "π", "e", "^", "√", "log", "(", ")", "x²", "x³", "EXP", "×10^", "Ans"].includes(val)
+                        ? "#0066cc"
+                        : "black",
+                  cursor: "pointer",
+                  fontWeight: ["sin", "cos", "tan", "π", "e", "^", "√", "log", "(", ")", "x²", "x³", "EXP", "×10^", "Ans"].includes(val) ? "bold" : "normal",
+                }}
+              >
+                {val}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

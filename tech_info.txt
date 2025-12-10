@@ -1,0 +1,538 @@
+# FLOAT CALCI - TECHNICAL DOCUMENTATION
+================================================================================
+
+## PROJECT OVERVIEW
+--------------------------------------------------------------------------------
+Float Calci is a modern web application featuring three types of floating
+calculators (Basic, Scientific, and Financial) with keyboard support and a responsive landing page.
+
+Repository: https://github.com/Vinitintodia/voice-calc-vision
+
+
+## TECHNOLOGY STACK
+================================================================================
+
+### CORE TECHNOLOGIES
+--------------------------------------------------------------------------------
+
+1. **React 18.3.1**
+   - Modern UI library for building component-based interfaces
+   - Uses functional components with hooks
+   - Fast rendering with Virtual DOM
+
+2. **TypeScript 5.5.3**
+   - Static type checking for JavaScript
+   - Enhanced IDE support and code quality
+   - Type definitions for all components and props
+
+3. **Vite 5.4.18**
+   - Next-generation frontend build tool
+   - Lightning-fast Hot Module Replacement (HMR)
+   - Optimized production builds
+   - Development server on port 8080
+
+4. **React Router DOM 6.26.2**
+   - Client-side routing
+   - Single Page Application (SPA) navigation
+   - Routes: "/" (Index), "*" (NotFound)
+
+
+### STYLING & UI FRAMEWORK
+--------------------------------------------------------------------------------
+
+1. **TailwindCSS 3.4.11**
+   - Utility-first CSS framework
+   - Custom brand colors (blue, purple, gray)
+   - Responsive design utilities
+   - Custom animations (float, fade-in, blur-in, scale-in)
+
+2. **shadcn/ui Components**
+   - Radix UI primitives (@radix-ui/react-*)
+   - 49+ pre-built accessible components
+   - Customizable with TailwindCSS
+   - Components: Dialog, Dropdown, Toast, Tooltip, etc.
+
+3. **Custom Animations**
+   - Float effect for visual elements
+   - Fade-in transitions
+   - Blur and scale animations
+   - Pulse effects
+
+4. **Fonts**
+   - SF Pro Display (primary)
+   - SF Mono (monospace)
+
+
+### STATE MANAGEMENT & DATA
+--------------------------------------------------------------------------------
+
+1. **TanStack React Query 5.56.2**
+   - Server state management
+   - Caching and synchronization
+   - Background data fetching
+
+2. **React Hook Form 7.53.0**
+   - Form state management
+   - Validation with Zod schemas
+   - Performance optimized
+
+3. **Zod 3.23.8**
+   - TypeScript-first schema validation
+   - Runtime type checking
+
+
+### ADDITIONAL LIBRARIES
+--------------------------------------------------------------------------------
+
+1. **Lucide React 0.462.0**
+   - Icon library (600+ icons)
+   - Tree-shakeable and lightweight
+
+2. **date-fns 3.6.0**
+   - Date manipulation and formatting
+
+3. **Sonner 1.5.0**
+   - Toast notifications
+
+4. **class-variance-authority 0.7.1**
+   - Component variant management
+
+5. **clsx 2.1.1** & **tailwind-merge 2.5.2**
+   - Conditional className utilities
+   - TailwindCSS class merging
+
+
+### DEVELOPMENT TOOLS
+--------------------------------------------------------------------------------
+
+1. **ESLint 9.9.0**
+   - Code linting and quality checks
+   - React hooks plugin
+   - TypeScript ESLint integration
+
+2. **PostCSS 8.4.47**
+   - CSS processing
+   - Autoprefixer for browser compatibility
+
+3. **@vitejs/plugin-react-swc 3.5.0**
+   - Fast React refresh using SWC compiler
+
+
+## PROJECT STRUCTURE
+================================================================================
+
+voice-calc-vision/
+│
+├── src/
+│   ├── components/
+│   │   ├── FloatingCalculator.tsx      # Basic calculator
+│   │   ├── ScientificCalculator.tsx    # Scientific calculator
+│   │   ├── FinancialCalculator.tsx     # Financial calculator
+│   │   ├── CalculatorManager.tsx       # Calculator type switcher
+│   │   ├── NavBar.tsx                  # Navigation bar
+│   │   ├── Hero.tsx                    # Landing page hero
+│   │   ├── Features.tsx                # Features section
+│   │   ├── AppDemo.tsx                 # App demonstration
+│   │   ├── DownloadSection.tsx         # Download CTA
+│   │   ├── Footer.tsx                  # Footer component
+│   │   ├── ui/                         # shadcn/ui components (49 files)
+│   │   └── ui-custom/                  # Custom UI components
+│   │
+│   ├── pages/
+│   │   ├── Index.tsx                   # Main landing page
+│   │   └── NotFound.tsx                # 404 page
+│   │
+│   ├── hooks/                          # Custom React hooks
+│   ├── lib/                            # Utility functions
+│   ├── App.tsx                         # Root component
+│   ├── main.tsx                        # Entry point
+│   ├── index.css                       # Global styles
+│   └── vite-env.d.ts                   # Type definitions
+│
+├── public/                             # Static assets
+├── dist/                               # Production build output
+├── package.json                        # Dependencies
+├── vite.config.ts                      # Vite configuration
+├── tailwind.config.ts                  # TailwindCSS config
+├── tsconfig.json                       # TypeScript config
+└── eslint.config.js                    # ESLint config
+
+
+## SYSTEM FLOW & ARCHITECTURE
+================================================================================
+
+### APPLICATION ENTRY POINT
+--------------------------------------------------------------------------------
+1. index.html loads the application
+2. main.tsx creates React root and renders <App />
+3. App.tsx sets up:
+   - QueryClientProvider (React Query)
+   - TooltipProvider (UI tooltips)
+   - Toaster components (notifications)
+   - BrowserRouter (routing)
+   - Routes configuration
+
+
+### ROUTING FLOW
+--------------------------------------------------------------------------------
+Route: "/"
+  └─> Index.tsx (Main landing page)
+      ├─> NavBar (with calculator toggle buttons)
+      ├─> Hero (introduction section)
+      ├─> Features (feature highlights)
+      ├─> AppDemo (app demonstration)
+      ├─> DownloadSection (download CTA)
+      ├─> Footer (footer links)
+      └─> CalculatorManager (conditional rendering)
+          ├─> FloatingCalculator (type: 'basic')
+          ├─> ScientificCalculator (type: 'scientific')
+          └─> FinancialCalculator (type: 'financial')
+
+Route: "*"
+  └─> NotFound.tsx (404 error page)
+
+
+### CALCULATOR SYSTEM FLOW
+--------------------------------------------------------------------------------
+
+1. USER INTERACTION (NavBar)
+   └─> User clicks calculator button (Basic/Scientific/Financial)
+       └─> toggleCalculator(type) called in Index.tsx
+           └─> Updates state:
+               - showCalculator: true
+               - calculatorType: 'basic' | 'scientific' | 'financial'
+
+2. CALCULATOR RENDERING
+   └─> CalculatorManager receives props:
+       - type: calculator type
+       - input: current expression
+       - onInputChange: callback for updates
+       - onKeyboardInput: keyboard handler
+   └─> Renders appropriate calculator component
+
+3. CALCULATOR FEATURES
+   ├─> Draggable (click & drag title bar)
+   ├─> Boundary constraints (stays within viewport)
+   ├─> Minimize/Maximize (collapse to title bar)
+   ├─> Close button (dispatches custom event)
+   ├─> Keyboard support (numbers, operators, functions)
+   ├─> Voice input (Web Speech API)
+   └─> Real-time calculations
+
+
+### CALCULATOR TYPES & CAPABILITIES
+================================================================================
+
+### 1. FLOATING CALCULATOR (Basic)
+--------------------------------------------------------------------------------
+FEATURES:
+  - Basic arithmetic operations (+, -, *, /, %)
+  - Decimal point support
+  - Plus/minus toggle (±)
+  - Clear function
+  - Keyboard support (0-9, operators, Enter, Escape)
+
+KEYBOARD SHORTCUTS:
+  - 0-9: Number input
+  - +, -, *, /, %: Operators
+  - Enter: Calculate result
+  - Escape/Backspace: Clear
+
+
+### 2. SCIENTIFIC CALCULATOR
+--------------------------------------------------------------------------------
+FEATURES:
+  - All basic calculator features
+  - Trigonometric functions (sin, cos, tan)
+    * Automatic degree-to-radian conversion
+    * Example: sin(30) = 0.5
+  - Logarithmic functions (log, ln)
+  - Square root (√)
+  - Power operations (^, x², x³)
+  - Mathematical constants (π, e)
+  - Parentheses support
+  - Scientific notation handling
+
+KEYBOARD SHORTCUTS:
+  - s: sin()
+  - c: cos()
+  - t: tan()
+  - l: log()
+  - r: √ (square root)
+  - p: π (pi)
+  - ^: Power operator
+  - (, ): Parentheses
+  - Spacebar: Close bracket )
+  - Enter: Calculate
+  - Escape: Clear
+  - Backspace: Delete last character
+
+CALCULATION ENGINE:
+  - Degree-to-radian conversion: degrees * (Math.PI / 180)
+  - Function replacement: sin() → Math.sin()
+  - Safe evaluation using Function constructor
+  - Error handling for invalid expressions
+
+
+### 3. FINANCIAL CALCULATOR
+--------------------------------------------------------------------------------
+FEATURES:
+  - Compound interest calculations
+  - Three input fields:
+    * Principal (PV) - Initial amount
+    * Rate (i%) - Interest rate
+    * Time (n) - Number of periods
+  - Result display with formatted currency
+  - Active field highlighting
+  - Blinking cursor indicator
+
+KEYBOARD SHORTCUTS:
+  - 0-9, .: Number input
+  - Arrow Up/Left: Previous field
+  - Arrow Down/Right: Next field
+  - Tab: Cycle through fields
+  - Enter/=: Calculate result
+  - Escape/c: Clear active field
+  - Backspace: Delete character
+
+CALCULATION:
+  - Formula: A = P(1 + r)^t
+  - Where:
+    * A = Final amount
+    * P = Principal
+    * r = Rate (as decimal)
+    * t = Time periods
+  - Currency formatting (K, M, B suffixes)
+
+
+### VOICE INPUT SYSTEM
+================================================================================
+
+TECHNOLOGY:
+  - Web Speech Recognition API
+  - Browser compatibility: Chrome, Edge (webkit prefix)
+
+IMPLEMENTATION:
+  1. User clicks microphone button (🎤)
+  2. SpeechRecognition instance created
+  3. Language set to "en-US"
+  4. Voice input captured
+  5. Transcript parsed for commands
+
+SUPPORTED VOICE COMMANDS:
+
+Basic Calculator:
+  - "power [base] to [exponent]"
+    Example: "power 2 to 3" → 2^3
+
+Scientific Calculator:
+  - "sine of [angle]" → sin(angle)
+  - "cosine of [angle]" → cos(angle)
+  - "square root of [number]" → √(number)
+
+Financial Calculator:
+  - "principal [amount] dollars"
+  - "rate [percentage]"
+  - "time [years] years"
+  - "calculate"
+
+
+### WINDOW MANAGEMENT SYSTEM
+================================================================================
+
+DRAGGING:
+  - Click and hold title bar
+  - Move calculator anywhere on screen
+  - Boundary constraints prevent off-screen movement
+  - Uses mouse events (mousedown, mousemove, mouseup)
+
+MINIMIZE/MAXIMIZE:
+  - Click minimize button (−)
+  - Calculator collapses to title bar only
+  - Click maximize button (□) to restore
+  - State managed with isMinimized boolean
+
+CLOSE:
+  - Click close button (✕)
+  - Dispatches custom event: 'closeCalculator'
+  - Event detail contains calculator type
+  - Index.tsx listens for event and hides calculator
+
+TRANSPARENCY:
+  - Hover effect: opacity 0.7 → 1.0
+  - Glassmorphism effect (backdrop-filter: blur)
+  - Smooth transitions (0.3s ease)
+
+
+### STATE MANAGEMENT PATTERNS
+================================================================================
+
+CALCULATOR STATE (Index.tsx):
+  - showCalculator: boolean
+  - calculatorInput: string
+  - calculatorType: 'basic' | 'scientific' | 'financial'
+
+INDIVIDUAL CALCULATOR STATE:
+  - expression: string (current input)
+  - dragging: boolean
+  - offset: {x, y} (position)
+  - isMinimized: boolean
+  - isHovered: boolean
+  - voiceText: string
+
+FINANCIAL CALCULATOR ADDITIONAL STATE:
+  - principal: string
+  - rate: string
+  - time: string
+  - result: string
+  - activeField: 'principal' | 'rate' | 'time'
+
+
+### EVENT HANDLING
+================================================================================
+
+KEYBOARD EVENTS:
+  - window.addEventListener('keydown', handleKeyDown)
+  - Prevents handling when focus is on input/textarea
+  - Key mapping to calculator functions
+  - Cleanup on component unmount
+
+MOUSE EVENTS:
+  - onMouseDown: Start dragging
+  - onMouseMove: Update position
+  - onMouseUp: Stop dragging
+  - onMouseEnter/Leave: Transparency effects
+
+CUSTOM EVENTS:
+  - closeCalculator: Dispatched when close button clicked
+  - Listened by Index.tsx to hide calculator
+
+
+### STYLING SYSTEM
+================================================================================
+
+TAILWINDCSS UTILITIES:
+  - Responsive classes (sm:, md:, lg:, xl:)
+  - Flexbox and Grid layouts
+  - Spacing utilities (p-, m-, gap-)
+  - Color system (brand colors)
+
+CUSTOM CSS:
+  - CSS variables for theming
+  - Glassmorphism effects
+  - Custom animations
+  - Gradient backgrounds
+
+COMPONENT STYLING:
+  - Inline styles for dynamic positioning
+  - TailwindCSS classes for static styles
+  - CSS-in-JS for calculator positioning
+
+
+### BUILD & DEPLOYMENT
+================================================================================
+
+DEVELOPMENT:
+  - Command: npm run dev
+  - Server: http://localhost:8080
+  - Hot Module Replacement enabled
+  - Source maps for debugging
+
+PRODUCTION BUILD:
+  - Command: npm run build
+  - Output: dist/ directory
+  - Minified and optimized
+  - Code splitting
+  - Tree shaking
+
+PREVIEW:
+  - Command: npm run preview
+  - Tests production build locally
+
+
+### KEY FEATURES SUMMARY
+================================================================================
+
+1. THREE CALCULATOR TYPES
+   ✓ Basic arithmetic calculator
+   ✓ Scientific calculator with trig functions
+   ✓ Financial calculator for compound interest
+
+2. ADVANCED INTERACTIONS
+   ✓ Drag-and-drop positioning
+   ✓ Minimize/maximize windows
+   ✓ Close functionality
+   ✓ Boundary constraints
+
+3. INPUT METHODS
+   ✓ Mouse/touch clicking
+   ✓ Keyboard shortcuts
+   ✓ Voice commands (Speech Recognition)
+
+4. SCIENTIFIC FEATURES
+   ✓ Degree-to-radian conversion
+   ✓ Trigonometric functions
+   ✓ Logarithms and powers
+   ✓ Mathematical constants
+   ✓ Bracket auto-complete (spacebar to close)
+
+5. UI/UX ENHANCEMENTS
+   ✓ Glassmorphism design
+   ✓ Smooth animations
+   ✓ Responsive layout
+   ✓ Accessibility features
+   ✓ Toast notifications
+
+6. TYPE SAFETY
+   ✓ Full TypeScript coverage
+   ✓ Type definitions for Speech API
+   ✓ Prop type validation
+   ✓ Compile-time error checking
+
+
+### BROWSER COMPATIBILITY
+================================================================================
+
+SUPPORTED BROWSERS:
+  - Chrome 90+ (full support)
+  - Edge 90+ (full support)
+  - Firefox 88+ (no voice input)
+  - Safari 14+ (limited voice support)
+
+REQUIRED FEATURES:
+  - ES6+ JavaScript
+  - CSS Grid and Flexbox
+  - Web Speech API (for voice input)
+  - LocalStorage (for potential future features)
+
+
+### PERFORMANCE OPTIMIZATIONS
+================================================================================
+
+1. Vite build tool for fast HMR
+2. React 18 concurrent features
+3. Code splitting by route
+4. Tree shaking unused code
+5. Lazy loading components
+6. Optimized bundle size
+7. CSS purging with TailwindCSS
+
+
+### FUTURE ENHANCEMENT POSSIBILITIES
+================================================================================
+
+1. Calculator history/memory
+2. Theme switching (dark/light mode)
+3. Export calculations to PDF
+4. More calculator types (Programmer, Unit Converter)
+5. Offline support (PWA)
+6. Multi-language support
+7. Cloud sync for calculations
+8. Advanced graphing capabilities
+
+
+================================================================================
+END OF TECHNICAL DOCUMENTATION
+================================================================================
+Generated: 2025-12-10
+Version: 1.0

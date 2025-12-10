@@ -7,8 +7,8 @@ import AnimatedText from "@/components/ui-custom/AnimatedText";
 const features = [
   {
     icon: <Mic className="h-6 w-6 text-brand-blue" />,
-    title: "Voice Commands",
-    description: "Perform calculations by speaking naturally. No need to type or click buttons."
+    title: "Keyboard Shortcuts",
+    description: "Use keyboard shortcuts for faster calculations. Type naturally with full keyboard support."
   },
   {
     icon: <Calculator className="h-6 w-6 text-brand-blue" />,
@@ -42,7 +42,7 @@ const Features = () => {
     <section id="features" className="py-20 bg-white relative overflow-hidden">
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-mesh-gradient opacity-50"></div>
-      
+
       <div className="container px-4 md:px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block mb-4">
@@ -50,14 +50,14 @@ const Features = () => {
               Features
             </span>
           </div>
-          
+
           <AnimatedText
             text="Smart Functionality Designed for Effortless Use"
             element="h2"
             animation="fade-in-up"
             className="text-3xl md:text-4xl font-bold tracking-tight text-balance mb-4"
           />
-          
+
           <AnimatedText
             text="Every feature is thoughtfully designed to help you perform calculations with minimal effort and maximum efficiency."
             element="p"
@@ -66,10 +66,10 @@ const Features = () => {
             className="text-lg text-muted-foreground"
           />
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div 
+            <div
               key={index}
               className="animate-fade-in-up"
               style={{ animationDelay: `${index * 100}ms` }}
