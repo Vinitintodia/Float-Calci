@@ -27,8 +27,8 @@ const AppDemo = () => {
   
   return (
     <section id="demo" className="py-20 bg-brand-gray-light/30 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-white to-transparent"></div>
-      <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-white to-transparent"></div>
+      <div className="absolute top-0 left-0 w-full h-20 bg-gradient-to-b from-background to-transparent"></div>
+      <div className="absolute bottom-0 left-0 w-full h-20 bg-gradient-to-t from-background to-transparent"></div>
       
       <div className="container px-4 md:px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
@@ -81,8 +81,8 @@ const AppDemo = () => {
               <GlassCard intensity="high" className="overflow-hidden shadow-xl">
                 <div className="aspect-video bg-brand-gray-dark/5 relative">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[360px]">
-                    <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100">
-                      <div className="h-12 bg-brand-gray-light border-b border-gray-200 flex items-center justify-between px-4">
+                    <div className="bg-card rounded-xl shadow-2xl overflow-hidden border border-border">
+                      <div className="h-12 bg-brand-gray-light border-b border-border flex items-center justify-between px-4">
                         <div className="text-sm font-medium text-brand-gray-dark">Basic Calculator</div>
                         <div className="flex space-x-2">
                           <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
@@ -137,8 +137,8 @@ const AppDemo = () => {
               <GlassCard intensity="high" className="overflow-hidden shadow-xl">
                 <div className="aspect-video bg-brand-gray-dark/5 relative">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[360px]">
-                    <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100">
-                      <div className="h-12 bg-brand-gray-light border-b border-gray-200 flex items-center justify-between px-4">
+                    <div className="bg-card rounded-xl shadow-2xl overflow-hidden border border-border">
+                      <div className="h-12 bg-brand-gray-light border-b border-border flex items-center justify-between px-4">
                         <div className="text-sm font-medium text-brand-gray-dark">Scientific Calculator</div>
                         <div className="flex space-x-2">
                           <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
@@ -199,8 +199,8 @@ const AppDemo = () => {
               <GlassCard intensity="high" className="overflow-hidden shadow-xl">
                 <div className="aspect-video bg-brand-gray-dark/5 relative">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[360px]">
-                    <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-100">
-                      <div className="h-12 bg-brand-gray-light border-b border-gray-200 flex items-center justify-between px-4">
+                    <div className="bg-card rounded-xl shadow-2xl overflow-hidden border border-border">
+                      <div className="h-12 bg-brand-gray-light border-b border-border flex items-center justify-between px-4">
                         <div className="text-sm font-medium text-brand-gray-dark">Financial Calculator</div>
                         <div className="flex space-x-2">
                           <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>

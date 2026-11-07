@@ -10,6 +10,10 @@ A modern floating calculator web application with three calculator types: Basic,
 - **Minimize/Maximize**: Collapse calculators to title bar
 - **Responsive Design**: Works on all screen sizes
 - **Modern UI**: Glassmorphism design with smooth animations
+- **Dark Theme**: Light/dark toggle (follows your system by default)
+- **Calculation History**: Every result is saved; close a calculator and it asks for your name or Google sign-in to keep them
+- **Float on Top of All Apps**: The green dot pins the calculator above every app on your laptop (Chrome/Edge 116+)
+- **Chrome Extension (Manifest V3)**: Toolbar popup, floating window and keyboard shortcuts. See [CHROME_EXTENSION_GUIDE.md](CHROME_EXTENSION_GUIDE.md)
 
 ## Calculator Types
 

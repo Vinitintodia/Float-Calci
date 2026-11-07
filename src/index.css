@@ -117,6 +117,72 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Calculator colours. Light values match the original design; .dark overrides.
+   Brand greys/purples are RGB triplets so Tailwind opacity (e.g. /50) works.
+--------------------------------------------------------------------------- */
+:root {
+  --brand-gray-light: 246 246 247;
+  --brand-gray-medium: 142 145 150;
+  --brand-gray-dark: 26 31 44;
+  --brand-purple-light: 229 222 255;
+
+  --calc-surface: rgba(255, 255, 255, 0.6);
+  --calc-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --calc-titlebar: #f0f8ff;
+  --calc-titlebar-dim: rgba(240, 248, 255, 0.7);
+  --calc-title-text: #666;
+  --calc-border: #ddd;
+  --calc-border-soft: rgba(221, 221, 221, 0.5);
+  --calc-display: rgba(255, 255, 255, 0.95);
+  --calc-text: #111;
+  --calc-pad: rgba(255, 255, 255, 0.8);
+  --calc-pad-dim: rgba(255, 255, 255, 0.5);
+  --calc-key: #f2f2f2;
+  --calc-key-text: #000;
+  --calc-op: #4da6ff;
+  --calc-op-text: #fff;
+  --calc-fn: #e6f7ff;
+  --calc-fn-text: #0066cc;
+  --calc-fin: #e6fff0;
+  --calc-fin-text: #2a9d8f;
+  --calc-field: #fff;
+  --calc-field-active: #f0f8ff;
+  --calc-result-bg: #f9f9f9;
+  --calc-window-bg: #f5f5f5;
+}
+
+.dark {
+  --brand-gray-light: 30 36 52;
+  --brand-gray-medium: 156 163 175;
+  --brand-gray-dark: 236 239 245;
+  --brand-purple-light: 58 48 110;
+
+  --calc-surface: rgba(24, 28, 38, 0.72);
+  --calc-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  --calc-titlebar: #1f2533;
+  --calc-titlebar-dim: rgba(31, 37, 51, 0.8);
+  --calc-title-text: #a3acbd;
+  --calc-border: #313a4d;
+  --calc-border-soft: rgba(49, 58, 77, 0.7);
+  --calc-display: rgba(15, 18, 26, 0.95);
+  --calc-text: #f1f4f9;
+  --calc-pad: rgba(24, 28, 38, 0.9);
+  --calc-pad-dim: rgba(24, 28, 38, 0.65);
+  --calc-key: #2a3142;
+  --calc-key-text: #eef1f6;
+  --calc-op: #2f8fe8;
+  --calc-op-text: #fff;
+  --calc-fn: #17304a;
+  --calc-fn-text: #7cc2ff;
+  --calc-fin: #143a33;
+  --calc-fin-text: #5fd3bf;
+  --calc-field: #151a24;
+  --calc-field-active: #1a2b40;
+  --calc-result-bg: #151a24;
+  --calc-window-bg: #0f121a;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -149,11 +215,11 @@
 
 @layer components {
   .glass-morphism {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg;
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg dark:bg-slate-900/80 dark:border-white/10;
   }
-  
+
   .glass-card {
-    @apply bg-white/60 backdrop-blur-md border border-white/30 shadow-md rounded-2xl;
+    @apply bg-white/60 backdrop-blur-md border border-white/30 shadow-md rounded-2xl dark:bg-slate-900/60 dark:border-white/10;
   }
   
   .subtle-shadow {

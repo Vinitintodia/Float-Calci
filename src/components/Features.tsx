@@ -39,7 +39,7 @@ const features = [
 
 const Features = () => {
   return (
-    <section id="features" className="py-20 bg-white relative overflow-hidden">
+    <section id="features" className="py-20 bg-card relative overflow-hidden">
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-mesh-gradient opacity-50"></div>
 

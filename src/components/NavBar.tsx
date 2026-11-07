@@ -2,93 +2,21 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { History } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
+import { useHistory } from "@/lib/history";
 
-// Add onFloCalClick prop to the component and keyboard input handling
 interface NavBarProps {
   onFloCalClick: (type: 'basic' | 'scientific' | 'financial') => void;
   isCalculatorVisible?: boolean;
   calculatorType?: 'basic' | 'scientific' | 'financial';
-  onKeyboardInput?: (key: string) => void;
+  onOpenHistory?: () => void;
 }
 
-const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onKeyboardInput }: NavBarProps) => {
+// Keyboard input is handled by each calculator itself (see CalculatorShell).
+const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onOpenHistory }: NavBarProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  // Add keyboard event listener when calculator is visible
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isCalculatorVisible) return;
-
-      // Handle numeric keys, operators, and other calculator inputs
-      const key = e.key;
-
-      // Define valid keys based on calculator type
-      let validKeys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '+', '-', '*', '/', '=', 'Enter', 'Backspace', 'Escape', 'c', 'C'];
-
-      // Add scientific calculator specific keys
-      if (calculatorType === 'scientific') {
-        validKeys = [...validKeys, '(', ')', '^', 'p', 'e', 's', 'o', 't', 'l', 'r', 'q'];
-      }
-
-      // Add financial calculator specific keys
-      if (calculatorType === 'financial') {
-        validKeys = [...validKeys, 'p', 'i', 'n', 't', 'f', 'r', 'Tab'];
-      }
-
-      if (validKeys.includes(key)) {
-        // Map keys based on calculator type
-        let mappedKey = key;
-
-        // Basic calculator mappings
-        if (key === 'Enter') mappedKey = '=';
-        else if (key === '*') mappedKey = '×';
-        else if (key === '/') mappedKey = '÷';
-        else if (key === 'c' || key === 'C') mappedKey = 'C';
-        else if (key === 'Backspace') mappedKey = '⌫';
-        else if (key === 'Escape') mappedKey = 'C';
-
-        // Scientific calculator specific mappings
-        if (calculatorType === 'scientific') {
-          if (key === 'p') mappedKey = 'π';
-          else if (key === 'e') mappedKey = 'e';
-          else if (key === 's') mappedKey = 'sin';
-          else if (key === 'o') mappedKey = 'cos';
-          else if (key === 't') mappedKey = 'tan';
-          else if (key === 'l') mappedKey = 'log';
-          else if (key === 'r') mappedKey = '√';
-          else if (key === 'q') mappedKey = 'x²';
-          else if (key === '^') mappedKey = '^';
-        }
-
-        // Financial calculator specific mappings
-        if (calculatorType === 'financial') {
-          if (key === 'p') mappedKey = 'PV';
-          else if (key === 'i') mappedKey = 'i%';
-          else if (key === 'n') mappedKey = 'n';
-          else if (key === 't') mappedKey = 'PMT';
-          else if (key === 'f') mappedKey = 'FV';
-          else if (key === 'r') mappedKey = 'ROI';
-          else if (key === 'Tab') mappedKey = 'Tab'; // For switching fields
-        }
-
-        // Pass the key to the calculator
-        if (onKeyboardInput) {
-          onKeyboardInput(mappedKey);
-        }
-
-        // Prevent default behavior for calculator keys
-        e.preventDefault();
-      }
-    };
-
-    if (isCalculatorVisible) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isCalculatorVisible, calculatorType, onKeyboardInput]);
+  const { unsavedCount } = useHistory();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -119,7 +47,7 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onKeyboard
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 md:px-6">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
@@ -131,9 +59,9 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onKeyboard
 
           <nav className="hidden md:flex items-center space-x-6">
             {/* Navigation links */}
-            <a href="#features" className="text-sm font-medium text-gray-700 hover:text-brand-blue">Features</a>
-            <a href="#demo" className="text-sm font-medium text-gray-700 hover:text-brand-blue">Demo</a>
-            <a href="#download" className="text-sm font-medium text-gray-700 hover:text-brand-blue">Download</a>
+            <a href="#features" className="text-sm font-medium text-foreground/75 hover:text-brand-blue">Features</a>
+            <a href="#demo" className="text-sm font-medium text-foreground/75 hover:text-brand-blue">Demo</a>
+            <a href="#download" className="text-sm font-medium text-foreground/75 hover:text-brand-blue">Download</a>
 
             {/* Try Calci dropdown */}
             <div className="relative">
@@ -169,12 +97,12 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onKeyboard
               {/* Dropdown menu */}
               {dropdownOpen && (
                 <div
-                  className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200"
+                  className="absolute right-0 mt-2 w-48 bg-popover text-popover-foreground rounded-md shadow-lg py-1 z-10 border border-border"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <button
                     className={cn(
-                      "flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100",
+                      "flex items-center w-full px-4 py-2 text-sm text-left hover:bg-accent",
                       isCalculatorVisible && calculatorType === 'basic' && "text-brand-blue font-medium"
                     )}
                     onClick={(e) => handleCalcSelect('basic', e)}
@@ -186,7 +114,7 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onKeyboard
                   </button>
                   <button
                     className={cn(
-                      "flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100",
+                      "flex items-center w-full px-4 py-2 text-sm text-left hover:bg-accent",
                       isCalculatorVisible && calculatorType === 'scientific' && "text-brand-blue font-medium"
                     )}
                     onClick={(e) => handleCalcSelect('scientific', e)}
@@ -198,7 +126,7 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onKeyboard
                   </button>
                   <button
                     className={cn(
-                      "flex items-center w-full px-4 py-2 text-sm text-left hover:bg-gray-100",
+                      "flex items-center w-full px-4 py-2 text-sm text-left hover:bg-accent",
                       isCalculatorVisible && calculatorType === 'financial' && "text-brand-blue font-medium"
                     )}
                     onClick={(e) => handleCalcSelect('financial', e)}
@@ -211,11 +139,34 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onKeyboard
                 </div>
               )}
             </div>
+
+            {/* History + theme */}
+            <button
+              onClick={onOpenHistory}
+              className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/80 hover:bg-accent hover:text-foreground"
+              aria-label="Calculation history"
+              title="History"
+            >
+              <History className="h-4 w-4" />
+              {unsavedCount > 0 && (
+                <span className="absolute -right-1 -top-1 min-w-[1.1rem] rounded-full bg-brand-blue px-1 text-[10px] font-semibold leading-[1.1rem] text-white">
+                  {unsavedCount > 99 ? "99+" : unsavedCount}
+                </span>
+              )}
+            </button>
+            <ThemeToggle />
           </nav>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            {/* Your mobile menu button */}
+          {/* Mobile: theme + history */}
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              onClick={onOpenHistory}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border"
+              aria-label="Calculation history"
+            >
+              <History className="h-4 w-4" />
+            </button>
+            <ThemeToggle />
           </div>
         </div>
       </div>

@@ -1,111 +1,135 @@
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import FloatingCalculator from './components/FloatingCalculator';
-import ScientificCalculator from './components/ScientificCalculator';
-import FinancialCalculator from './components/FinancialCalculator';
-import { useState } from 'react';
+// Chrome extension UI. The same page is used in two places:
+//   popup.html              -> the toolbar popup
+//   popup.html?mode=window  -> a small separate window that can be pinned
+//                              "on top of all apps" (Document Picture-in-Picture)
+import { createRoot } from "react-dom/client";
+import React, { useState } from "react";
+import { History, Pin } from "lucide-react";
+import "./index.css";
+import CalculatorManager from "./components/CalculatorManager";
+import HistoryPanel from "./components/HistoryPanel";
+import ThemeToggle from "./components/ThemeToggle";
+import { Toaster } from "./components/ui/sonner";
+import { CalculatorHostContext, type CalculatorHost } from "./components/calculator/CalculatorHost";
+import { PIN_EVENT } from "./components/calculator/CalculatorShell";
+import { useSaveOnClose } from "./hooks/use-save-on-close";
+import { getSurface, isExtension, supportsAlwaysOnTop } from "./lib/env";
+import { useHistory, type CalculatorType } from "./lib/history";
+import { cn } from "./lib/utils";
 
-const Popup = () => {
-    const [calculatorType, setCalculatorType] = useState<'basic' | 'scientific' | 'financial'>('basic');
-    const [calculatorInput, setCalculatorInput] = useState("");
+const surface = getSurface();
+const initialType = (new URLSearchParams(location.search).get("calc") as CalculatorType) || "basic";
 
-    const handleKeyboardInput = (key: string) => {
-        console.log(`Key pressed: ${key}`);
-    };
+const TABS: { type: CalculatorType; label: string }[] = [
+  { type: "basic", label: "Basic" },
+  { type: "scientific", label: "Scientific" },
+  { type: "financial", label: "Financial" },
+];
 
-    return (
-        <div style={{
-            width: '400px',
-            minHeight: '500px',
-            background: '#f5f5f5',
-            padding: '1rem'
-        }}>
-            {/* Calculator Type Selector */}
-            <div style={{
-                display: 'flex',
-                gap: '0.5rem',
-                marginBottom: '1rem',
-                background: 'white',
-                padding: '0.5rem',
-                borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-            }}>
-                <button
-                    onClick={() => setCalculatorType('basic')}
-                    style={{
-                        flex: 1,
-                        padding: '0.5rem',
-                        border: 'none',
-                        borderRadius: '4px',
-                        background: calculatorType === 'basic' ? '#0EA5E9' : '#e5e7eb',
-                        color: calculatorType === 'basic' ? 'white' : '#374151',
-                        cursor: 'pointer',
-                        fontWeight: '500',
-                        fontSize: '0.875rem'
-                    }}
-                >
-                    Basic
-                </button>
-                <button
-                    onClick={() => setCalculatorType('scientific')}
-                    style={{
-                        flex: 1,
-                        padding: '0.5rem',
-                        border: 'none',
-                        borderRadius: '4px',
-                        background: calculatorType === 'scientific' ? '#0EA5E9' : '#e5e7eb',
-                        color: calculatorType === 'scientific' ? 'white' : '#374151',
-                        cursor: 'pointer',
-                        fontWeight: '500',
-                        fontSize: '0.875rem'
-                    }}
-                >
-                    Scientific
-                </button>
-                <button
-                    onClick={() => setCalculatorType('financial')}
-                    style={{
-                        flex: 1,
-                        padding: '0.5rem',
-                        border: 'none',
-                        borderRadius: '4px',
-                        background: calculatorType === 'financial' ? '#0EA5E9' : '#e5e7eb',
-                        color: calculatorType === 'financial' ? 'white' : '#374151',
-                        cursor: 'pointer',
-                        fontWeight: '500',
-                        fontSize: '0.875rem'
-                    }}
-                >
-                    Financial
-                </button>
-            </div>
-
-            {/* Calculator Display */}
-            <div style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
-                {calculatorType === 'basic' && (
-                    <FloatingCalculator
-                        input={calculatorInput}
-                        onInputChange={setCalculatorInput}
-                        onKeyboardInput={handleKeyboardInput}
-                    />
-                )}
-                {calculatorType === 'scientific' && (
-                    <ScientificCalculator
-                        input={calculatorInput}
-                        onInputChange={setCalculatorInput}
-                        onKeyboardInput={handleKeyboardInput}
-                    />
-                )}
-                {calculatorType === 'financial' && (
-                    <FinancialCalculator
-                        input={calculatorInput}
-                        onInputChange={setCalculatorInput}
-                        onKeyboardInput={handleKeyboardInput}
-                    />
-                )}
-            </div>
-        </div>
-    );
+const openFloatingWindow = async (calc: CalculatorType) => {
+  if (isExtension()) {
+    await chrome.runtime.sendMessage({ type: "open-floating-window", calc });
+    window.close();
+  } else {
+    window.open(`popup.html?mode=window&calc=${calc}`, "floatcalci", "width=400,height=700");
+  }
 };
 
-createRoot(document.getElementById("root")!).render(<Popup />);
+// Minimise the extension window while the calculator floats on top of everything.
+const setHostWindowMinimised = (minimised: boolean) => {
+  if (!isExtension() || surface !== "window") return;
+  chrome.windows.getCurrent((w) => {
+    if (w.id !== undefined) chrome.windows.update(w.id, minimised ? { state: "minimized" } : { focused: true, state: "normal" });
+  });
+};
+
+const ExtensionApp = () => {
+  const [type, setType] = useState<CalculatorType>(initialType);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const { unsavedCount } = useHistory();
+  const { requestClose, dialog } = useSaveOnClose(() => window.close());
+
+  const host: CalculatorHost =
+    surface === "popup"
+      ? {
+          docked: true,
+          requestClose,
+          // The toolbar popup closes when it loses focus, so it can't host an
+          // always-on-top window itself; open the separate window instead.
+          float: () => void openFloatingWindow(type),
+          floatLabel: "Open as a floating window",
+        }
+      : { docked: true, requestClose, onAlwaysOnTopChange: setHostWindowMinimised };
+
+  return (
+    <div
+      className={cn("text-foreground", surface === "popup" ? "w-[380px]" : "min-h-screen w-full")}
+      style={{ background: "var(--calc-window-bg)" }}
+    >
+      <header className="flex items-center gap-2 px-3 pb-2 pt-3">
+        <span className="mr-auto text-sm font-bold text-brand-blue">Float Calci</span>
+        {surface === "window" && supportsAlwaysOnTop() && (
+          <button
+            onClick={() => window.dispatchEvent(new Event(PIN_EVENT))}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-blue px-3 text-xs font-medium text-white hover:bg-brand-blue/90"
+            title="Keep the calculator above all your apps"
+          >
+            <Pin className="h-3.5 w-3.5" /> Pin on top
+          </button>
+        )}
+        {surface === "popup" && (
+          <button
+            onClick={() => void openFloatingWindow(type)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border px-3 text-xs font-medium hover:bg-accent"
+            title="Open in its own window that you can pin above all apps"
+          >
+            <Pin className="h-3.5 w-3.5" /> Float
+          </button>
+        )}
+        <button
+          onClick={() => setHistoryOpen(true)}
+          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border hover:bg-accent"
+          aria-label="Calculation history"
+          title="History"
+        >
+          <History className="h-4 w-4" />
+          {unsavedCount > 0 && (
+            <span className="absolute -right-1 -top-1 min-w-[1.1rem] rounded-full bg-brand-blue px-1 text-[10px] font-semibold leading-[1.1rem] text-white">
+              {unsavedCount > 99 ? "99+" : unsavedCount}
+            </span>
+          )}
+        </button>
+        <ThemeToggle />
+      </header>
+
+      <nav className="mx-3 mb-3 flex gap-1 rounded-xl bg-card p-1 shadow-sm" role="tablist">
+        {TABS.map((t) => (
+          <button
+            key={t.type}
+            role="tab"
+            aria-selected={type === t.type}
+            onClick={() => setType(t.type)}
+            className={cn(
+              "flex-1 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors",
+              type === t.type ? "bg-brand-blue text-white" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      <main className="px-3 pb-3">
+        <CalculatorHostContext.Provider value={host}>
+          <CalculatorManager key={type} type={type} />
+        </CalculatorHostContext.Provider>
+      </main>
+
+      <HistoryPanel open={historyOpen} onOpenChange={setHistoryOpen} />
+      {dialog}
+      <Toaster position="top-center" />
+    </div>
+  );
+};
+
+createRoot(document.getElementById("root")!).render(<ExtensionApp />);

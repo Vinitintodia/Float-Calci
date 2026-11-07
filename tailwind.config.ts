@@ -65,13 +65,14 @@ export default {
 				},
 				brand: {
 					blue: "#0EA5E9",
+					// CSS variables so they flip in dark mode (see index.css)
 					gray: {
-						light: "#F6F6F7",
-						medium: "#8E9196",
-						dark: "#1A1F2C"
+						light: "rgb(var(--brand-gray-light) / <alpha-value>)",
+						medium: "rgb(var(--brand-gray-medium) / <alpha-value>)",
+						dark: "rgb(var(--brand-gray-dark) / <alpha-value>)"
 					},
 					purple: {
-						light: "#E5DEFF",
+						light: "rgb(var(--brand-purple-light) / <alpha-value>)",
 						medium: "#9b87f5",
 						dark: "#6E59A5"
 					}

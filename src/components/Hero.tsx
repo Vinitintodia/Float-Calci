@@ -95,11 +95,11 @@ const Hero = () => {
         {/* Calculator Preview Section - Shows a visual demo of the app */}
         <div className="mt-16 w-full max-w-3xl mx-auto animate-fade-in-up animate-delay-500">
           <GlassCard intensity="high" className="p-6 sm:p-8 shadow-xl">
-            <div className="aspect-[16/9] bg-black/5 rounded-lg overflow-hidden relative flex items-center justify-center">
+            <div className="aspect-[16/9] bg-black/5 dark:bg-white/5 rounded-lg overflow-hidden relative flex items-center justify-center">
               {/* Calculator UI mockup */}
-              <div className="w-[280px] h-[400px] bg-white rounded-xl shadow-2xl overflow-hidden animate-float">
+              <div className="w-[280px] h-[400px] bg-card rounded-xl shadow-2xl overflow-hidden animate-float">
                 {/* Calculator window header with macOS-style controls */}
-                <div className="h-14 bg-brand-gray-light border-b border-gray-200 flex items-center justify-between px-4">
+                <div className="h-14 bg-brand-gray-light border-b border-border flex items-center justify-between px-4">
                   <div className="text-sm font-medium text-brand-gray-dark">Calculator</div>
                   <div className="flex space-x-2">
                     <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
@@ -146,7 +146,7 @@ const Hero = () => {
               </div>
               {/* Floating caption below the calculator */}
               <div className="absolute bottom-6 left-0 right-0 flex justify-center">
-                <div className="text-xs text-muted-foreground bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full">
+                <div className="text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full">
                   Elegant interface that follows your cursor
                 </div>
               </div>

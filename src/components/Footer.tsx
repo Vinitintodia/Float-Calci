@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t border-gray-100">
+    <footer className="bg-card border-t border-border">
       <div className="container px-4 md:px-6 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div className="space-y-4">
@@ -82,7 +82,7 @@ const Footer = () => {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
+                className="px-3 py-2 bg-muted border border-border rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-brand-blue/30"
               />
               <Button size="icon" className="bg-brand-blue hover:bg-brand-blue/90">
                 <ArrowRight className="h-4 w-4" />
@@ -91,7 +91,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center">
+        <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">
             © 2023 FloatCalci. All rights reserved.
           </p>

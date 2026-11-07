@@ -24,6 +24,8 @@ export default defineConfig(({ mode }) => ({
       input: {
         popup: path.resolve(__dirname, 'popup.html'),
         index: path.resolve(__dirname, 'index.html'),
+        // Chrome extension service worker -> dist/assets/background.js
+        background: path.resolve(__dirname, 'src/extension/background.ts'),
       },
       output: {
         entryFileNames: 'assets/[name].js',
