@@ -18,9 +18,16 @@ import { useSaveOnClose } from "./hooks/use-save-on-close";
 import { getSurface, isExtension, supportsAlwaysOnTop } from "./lib/env";
 import { useHistory, type CalculatorType } from "./lib/history";
 import { useTheme } from "./lib/theme";
+import { toast } from "sonner";
 import { cn } from "./lib/utils";
 
 const surface = getSurface();
+const notice = new URLSearchParams(location.search).get("notice");
+const NOTICE_TEXT: Record<string, string> = {
+  restricted: "Chrome doesn't let extensions draw on its own pages, so here's Float Calci as a popup. On any website, click the icon to float it on the page.",
+  file: "To float the calculator on local files, turn on “Allow access to file URLs” for Float Calci in chrome://extensions. Here it is as a popup for now.",
+  blocked: "This page doesn't allow the floating calculator, so here's Float Calci as a popup.",
+};
 const LAST_CALC_KEY = "floatcalci:lastCalc";
 const readLastCalc = (): CalculatorType | null => {
   try {
@@ -82,6 +89,11 @@ const ExtensionApp = () => {
 
   useEffect(() => toOverlay({ type: "floatcalci:theme", dark: theme === "dark" }), [theme]);
 
+  // Opened as a popup because the page doesn't allow the on-page calculator
+  useEffect(() => {
+    if (notice && NOTICE_TEXT[notice]) toast(NOTICE_TEXT[notice], { duration: 6000 });
+  }, []);
+
   // Overlay: report our height so the window fits (taller while the save prompt
   // or history panel is open, so they don't have to scroll), and close when asked
   const needsRoom = saveOpen || historyOpen;
@@ -116,20 +128,47 @@ const ExtensionApp = () => {
       ? {
           docked: true,
           compact: true,
+          hideTitleBar: true, // the header has the Float button; click outside to close
           requestClose,
           // The toolbar popup closes when it loses focus, so it can't host an
           // always-on-top window itself; open the separate window instead.
           float: () => void openFloatingWindow(type),
           floatLabel: "Open as a floating window",
         }
-      : { docked: true, requestClose, onAlwaysOnTopChange: setHostWindowMinimised };
+      : // The desktop window has its own close / minimise buttons, so no second set inside
+        { docked: true, hideTitleBar: true, requestClose, onAlwaysOnTopChange: setHostWindowMinimised };
+
+  // Desktop window: resize it to fit the calculator (no empty space below)
+  useEffect(() => {
+    if (surface !== "window" || !isExtension()) return;
+    const el = rootRef.current?.firstElementChild as HTMLElement | null;
+    if (!el) return;
+    let last = 0;
+    const fit = () => {
+      const content = Math.ceil(el.getBoundingClientRect().height) + 8;
+      if (Math.abs(content - last) < 4) return;
+      last = content;
+      const frame = window.outerHeight - window.innerHeight; // title bar
+      chrome.windows.getCurrent((w) => {
+        if (w.id !== undefined && w.state === "normal") chrome.windows.update(w.id, { height: content + frame });
+      });
+    };
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
     <div
       ref={rootRef}
-      className={cn("text-foreground", surface === "popup" ? "w-[380px]" : surface === "overlay" ? "w-full" : "min-h-screen w-full")}
+      className={cn(
+        "text-foreground",
+        surface === "popup" ? "w-[380px]" : surface === "overlay" ? "w-full" : "min-h-screen w-full",
+      )}
       style={{ background: "var(--calc-window-bg)" }}
     >
+      {/* The window keeps calculator proportions even when maximised or full screen */}
+      <div className={cn(surface === "window" && "mx-auto w-full max-w-[420px] pt-2")}>
       <header className="flex items-center gap-1.5 px-2.5 pb-2 pt-2.5">
         <nav className="flex flex-1 gap-0.5 rounded-xl bg-card p-0.5 shadow-sm" role="tablist" aria-label="Calculator">
           {TABS.map((t) => (
@@ -187,6 +226,7 @@ const ExtensionApp = () => {
           <CalculatorManager key={type} type={type} />
         </CalculatorHostContext.Provider>
       </main>
+      </div>
 
       <HistoryPanel open={historyOpen} onOpenChange={setHistoryOpen} />
       {dialog}
