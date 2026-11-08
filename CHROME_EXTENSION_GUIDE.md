@@ -66,6 +66,9 @@ Shortcuts can be changed at `chrome://extensions/shortcuts`.
 * Browsers don't allow custom popups when a *tab* or the toolbar popup is closed. In that case nothing is lost:
   the calculations stay on the device as "unsaved" and the prompt appears the next time you close a calculator.
 * Open the **History** (clock icon) to see, copy, delete or save calculations, or to sign out.
+  **Sign out & delete my data** removes your saved calculations from this device.
+* A name profile has no password, so anyone using the same browser could open it. On a shared computer, delete
+  your data when you're done.
 
 Storage is per device/browser for now. Syncing across devices needs a backend (for example Firebase or
 Supabase keyed by the Google account id).
@@ -99,6 +102,10 @@ your name, email and photo.
 * **storage**: saves calculation history, your profile and calculator values on this device.
 * **identity**: the Google sign-in window.
 * **activeTab + scripting**: show the calculator on the tab you clicked the icon on (only that tab, only when you click).
+
+There are no host permissions, so the extension can't read or change websites. Its files use
+`use_dynamic_url`, so websites can't detect that it's installed. More in [SECURITY.md](SECURITY.md); for how
+the code fits together, see the [developer guide](docs/DEVELOPER.md).
 
 Nothing is sent anywhere except Google's sign-in, and only if you choose it.
 

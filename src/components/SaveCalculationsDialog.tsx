@@ -125,6 +125,10 @@ const SaveCalculationsDialog: React.FC<SaveCalculationsDialogProps> = ({ open, o
           </Button>
         </form>
 
+        <p className="-mt-1 text-xs text-muted-foreground">
+          Saved in this browser only. A name has no password, so anyone using this browser could open it.
+        </p>
+
         <DialogFooter className="sm:justify-center">
           <Button variant="ghost" size="sm" onClick={notNow} className="h-auto whitespace-normal text-muted-foreground">
             Not now (keep them on this device only)

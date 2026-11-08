@@ -22,7 +22,7 @@
 |---|---|---|
 | ![Financial calculator](docs/screenshots/financial.jpg) | ![Dark mode](docs/screenshots/dark-mode.jpg) | ![Mobile](docs/screenshots/mobile.jpg) |
 
-**Edge tuck**: tucked into the side (left), then slid out after hovering near the tab (right)
+**Edge tuck**: tucked into the side, the tab filling while you hover, then sliding out
 
 ![Edge tuck](docs/screenshots/edge-tuck.jpg)
 
@@ -147,7 +147,8 @@ On the landing page, the demo calculators only take the keyboard after you click
 
 - Results are stored on your device: `localStorage` on the website, `chrome.storage.local` in the extension.
 - When you close a calculator with unsaved calculations, you can save them under your **name** or with **Google**. After that, new results save to your profile automatically.
-- Signing out keeps your saved calculations on the device; they come back when you sign in again.
+- Signing out keeps your saved calculations on the device; they come back when you sign in again. **Sign out & delete my data** removes them.
+- A name profile has no password: anyone using the same browser can open it. On a shared computer, delete your data when you're done or use your own Chrome profile. See [SECURITY.md](SECURITY.md).
 
 **Enabling Google sign-in** (optional): create an OAuth Client ID in Google Cloud Console, then copy `.env.example` to `.env` and set:
 
@@ -202,6 +203,14 @@ public/manifest.json              # Manifest V3
 - Publish to the Chrome Web Store
 - Desktop app (Tauri) so it can float even with Chrome closed
 
+## 🔒 Security & privacy
+
+No server, no accounts on a server: everything is stored in your browser on your device. The extension has no
+host permissions and only runs on a tab when you click it; the website ships with a strict Content Security
+Policy. Details, limitations and how to report a problem: [SECURITY.md](SECURITY.md).
+
 ## 🤝 Contributing
 
-Pull requests are welcome. Run `npm test` and `npm run lint` before opening one. For bigger changes, please open an issue first to discuss what you'd like to change.
+Read the [developer guide](docs/DEVELOPER.md) (architecture, the financial engine, the extension, testing and
+releasing). Run `npm test` and `npm run lint` before opening a pull request. For bigger changes, please open an
+issue first.

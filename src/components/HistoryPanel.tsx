@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import SaveCalculationsDialog from "@/components/SaveCalculationsDialog";
-import { clearVisibleHistory, deleteEntry, signOut, useHistory, type CalculatorType } from "@/lib/history";
+import { clearVisibleHistory, deleteEntry, signOut, signOutAndDelete, useHistory, type CalculatorType } from "@/lib/history";
 import { cn } from "@/lib/utils";
 
 const LABEL: Record<CalculatorType, string> = { basic: "Basic", scientific: "Scientific", financial: "Financial" };
@@ -26,6 +26,8 @@ interface HistoryPanelProps {
 const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, onOpenChange }) => {
   const { profile, entries, unsavedCount } = useHistory();
   const [saveOpen, setSaveOpen] = useState(false);
+  // Two-step confirms (browser confirm() pop-ups can be blocked inside the on-page calculator)
+  const [confirming, setConfirming] = useState<"clear" | "delete" | null>(null);
 
   const copy = async (text: string) => {
     try {
@@ -63,7 +65,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, onOpenChange }) => {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{profile.name}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {profile.provider === "google" ? profile.email : "Saved by name"}
+                    {profile.provider === "google" ? profile.email : "Name only (no password), on this device"}
                   </p>
                 </div>
                 <Button variant="ghost" size="icon" onClick={signOut} title="Sign out" aria-label="Sign out">
@@ -81,6 +83,19 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, onOpenChange }) => {
               </>
             )}
           </div>
+
+          {profile && (
+            <div className="-mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-muted-foreground">
+              <span>{profile.provider === "name" ? "Anyone using this browser can open a name profile." : "Saved only in this browser."}</span>
+              <button
+                onClick={() => (confirming === "delete" ? (signOutAndDelete(), setConfirming(null)) : setConfirming("delete"))}
+                onBlur={() => setConfirming(null)}
+                className={cn("font-medium hover:underline", confirming === "delete" ? "text-destructive" : "text-muted-foreground")}
+              >
+                {confirming === "delete" ? "Tap again to delete" : "Sign out & delete my data"}
+              </button>
+            </div>
+          )}
 
           {/* Entries */}
           <div className="-mx-2 flex-1 overflow-y-auto px-2">
@@ -129,12 +144,11 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ open, onOpenChange }) => {
             <Button
               variant="ghost"
               size="sm"
-              className="gap-2 text-muted-foreground hover:text-destructive"
-              onClick={() => {
-                if (window.confirm("Delete all calculations in this list? This can't be undone.")) clearVisibleHistory();
-              }}
+              className={cn("gap-2 hover:text-destructive", confirming === "clear" ? "text-destructive" : "text-muted-foreground")}
+              onClick={() => (confirming === "clear" ? (clearVisibleHistory(), setConfirming(null)) : setConfirming("clear"))}
+              onBlur={() => setConfirming(null)}
             >
-              <Trash2 className="h-4 w-4" /> Clear history
+              <Trash2 className="h-4 w-4" /> {confirming === "clear" ? "Tap again to delete all of these" : "Clear history"}
             </Button>
           )}
         </SheetContent>

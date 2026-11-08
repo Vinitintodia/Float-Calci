@@ -93,6 +93,12 @@ export const saveToProfile = (profile: Profile) => {
 /** Sign out. Saved calculations stay on this device and come back on next sign-in. */
 export const signOut = () => update({ ...state, profile: null });
 
+/** Sign out and delete everything saved to this profile on this device. */
+export const signOutAndDelete = () => {
+  const pid = state.profile?.id;
+  update({ profile: null, entries: state.entries.filter((e) => e.profileId !== pid) });
+};
+
 /** Delete the calculations currently visible (the user's saved ones + unsaved ones). */
 export const clearVisibleHistory = () => {
   const pid = state.profile?.id ?? null;
