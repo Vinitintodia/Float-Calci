@@ -92,7 +92,7 @@ const DownloadSection = ({ onFloatEverywhere }: DownloadSectionProps) => {
                 </Button>
               ) : null}
               {canFloat ? (
-                <Button variant="outline" className="w-full gap-2" onClick={onFloatEverywhere}>
+                <Button variant="outline" className="w-full gap-2" onClick={() => onFloatEverywhere()}>
                   <Pin className="h-4 w-4" /> Float it over everything now
                 </Button>
               ) : (

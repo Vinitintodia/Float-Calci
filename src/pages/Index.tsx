@@ -23,14 +23,15 @@ const Index = () => {
     setFloatNow(false);
   });
 
-  // "Float it over everything": open the calculator straight into the
+  // "Float it over everything": open the chosen calculator straight into the
   // always-on-top window, above every tab and app.
-  const floatEverywhere = () => {
-    if (showCalculator) {
+  const floatEverywhere = (type: CalculatorType = "basic") => {
+    if (showCalculator && calculatorType === type) {
       window.dispatchEvent(new Event(PIN_EVENT));
       return;
     }
-    setCalculatorType("basic");
+    // A different type (or none open yet): the keyed calculator remounts and starts on top
+    setCalculatorType(type);
     setFloatNow(true);
     setShowCalculator(true);
   };
@@ -56,6 +57,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <NavBar
         onFloCalClick={toggleCalculator}
+        onFloatEverywhere={floatEverywhere}
         isCalculatorVisible={showCalculator}
         calculatorType={calculatorType}
         onOpenHistory={() => setHistoryOpen(true)}

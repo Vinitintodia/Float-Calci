@@ -82,7 +82,7 @@ const Hero = ({ onFloatEverywhere }: HeroProps) => {
             <Button
               size="lg"
               className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8 gap-2"
-              onClick={canFloat ? onFloatEverywhere : scrollToDemo}
+              onClick={canFloat ? () => onFloatEverywhere() : scrollToDemo}
             >
               {canFloat ? (
                 <>

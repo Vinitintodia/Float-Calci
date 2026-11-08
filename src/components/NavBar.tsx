@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BarChart3, Calculator, ChevronDown, Download, FlaskConical, History, Menu } from "lucide-react";
+import { BarChart3, Calculator, ChevronDown, Download, FlaskConical, History, Menu, Pin } from "lucide-react";
 import { toast } from "sonner";
 import { useInstall } from "@/lib/install";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { useHistory, type CalculatorType } from "@/lib/history";
 
 interface NavBarProps {
   onFloCalClick: (type: CalculatorType) => void;
+  /** Float this calculator over every app (the pin button next to each one). */
+  onFloatEverywhere?: (type: CalculatorType) => void;
   isCalculatorVisible?: boolean;
   calculatorType?: CalculatorType;
   onOpenHistory?: () => void;
@@ -28,7 +30,7 @@ const LINKS = [
 ];
 
 // Keyboard input is handled by each calculator itself (see CalculatorShell).
-const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onOpenHistory }: NavBarProps) => {
+const NavBar = ({ onFloCalClick, onFloatEverywhere, isCalculatorVisible, calculatorType, onOpenHistory }: NavBarProps) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { unsavedCount } = useHistory();
@@ -109,21 +111,36 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onOpenHist
                   onClick={(e) => e.stopPropagation()}
                 >
                   {CALCS.map((c) => (
-                    <button
+                    <div
                       key={c.type}
-                      role="menuitem"
-                      className={cn(
-                        "flex items-center gap-2 w-full px-4 py-2 text-sm text-left hover:bg-accent",
-                        isOpen(c.type) && "text-brand-blue font-medium",
-                      )}
-                      onClick={() => {
-                        onFloCalClick(c.type);
-                        setDropdownOpen(false);
-                      }}
+                      className={cn("flex items-center hover:bg-accent", isOpen(c.type) && "text-brand-blue font-medium")}
                     >
-                      {c.icon}
-                      {c.label}
-                    </button>
+                      <button
+                        role="menuitem"
+                        className="flex flex-1 items-center gap-2 px-4 py-2 text-sm text-left"
+                        onClick={() => {
+                          onFloCalClick(c.type);
+                          setDropdownOpen(false);
+                        }}
+                      >
+                        {c.icon}
+                        {c.label}
+                      </button>
+                      {onFloatEverywhere && (
+                        <button
+                          type="button"
+                          className="mr-2 inline-flex h-7 w-7 flex-none items-center justify-center rounded-full text-foreground/70 hover:bg-background hover:text-brand-blue"
+                          title={`Float ${c.label} over everything`}
+                          aria-label={`Float ${c.label} over everything`}
+                          onClick={() => {
+                            onFloatEverywhere(c.type);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          <Pin className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -162,20 +179,37 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onOpenHist
           <p className="mt-6 mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Open a calculator</p>
           <div className="grid gap-2">
             {CALCS.map((c) => (
-              <button
+              <div
                 key={c.type}
-                onClick={() => {
-                  setMobileOpen(false);
-                  onFloCalClick(c.type);
-                }}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg border border-border px-4 py-3 text-sm font-medium hover:bg-accent",
+                  "flex items-center rounded-lg border border-border hover:bg-accent",
                   isOpen(c.type) && "border-brand-blue text-brand-blue",
                 )}
               >
-                {c.icon}
-                {c.label}
-              </button>
+                <button
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onFloCalClick(c.type);
+                  }}
+                  className="flex flex-1 items-center gap-3 px-4 py-3 text-sm font-medium"
+                >
+                  {c.icon}
+                  {c.label}
+                </button>
+                {onFloatEverywhere && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      onFloatEverywhere(c.type);
+                    }}
+                    className="mr-3 inline-flex h-8 items-center gap-1.5 rounded-full border border-border px-3 text-xs font-medium text-foreground/80"
+                    title={`Float ${c.label} over everything`}
+                  >
+                    <Pin className="h-3.5 w-3.5" /> Float
+                  </button>
+                )}
+              </div>
             ))}
           </div>
 
