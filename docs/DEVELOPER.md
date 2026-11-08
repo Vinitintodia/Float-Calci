@@ -169,8 +169,9 @@ The overlay only accepts messages whose `source` is its own iframe; the iframe o
 parent window.
 
 ### Permissions
-`storage`, `identity`, `activeTab`, `scripting`. No host permissions. `web_accessible_resources` use
-`use_dynamic_url: true` so websites can't detect the extension by probing its files.
+`storage`, `identity`, `activeTab`, `scripting`. No host permissions. `web_accessible_resources` (`popup.html`, `assets/*`, `icons/*`) are
+exposed to all sites without `use_dynamic_url`: Chrome blocks dynamic URLs inside iframes, and the on-page overlay is an iframe.
+Websites can therefore detect the extension by probing these files.
 
 ## 6b. The installable web app (PWA)
 

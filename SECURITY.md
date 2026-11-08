@@ -41,7 +41,9 @@ by name. On a shared computer:
   website can't read what you type or style the calculator, and the calculator can't read the page.
 * Messages between the page window and the calculator frame carry no calculation data (only height, theme and
   which tab is open), and each side only accepts messages from the other.
-* Extension files use `use_dynamic_url`, so websites can't detect that Float Calci is installed.
+* The extension's calculator page is loaded into the on-page frame as a normal web-accessible resource (no
+  `use_dynamic_url`: Chrome blocks that setting inside iframes, so the floating calculator wouldn't load). This means
+  a website that looks for the extension's files can tell Float Calci is installed.
 * Strict extension CSP (`script-src 'self'`): no remote scripts or fonts.
 
 **Installed app / offline support**

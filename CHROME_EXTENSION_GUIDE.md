@@ -103,8 +103,8 @@ your name, email and photo.
 * **identity**: the Google sign-in window.
 * **activeTab + scripting**: show the calculator on the tab you clicked the icon on (only that tab, only when you click).
 
-There are no host permissions, so the extension can't read or change websites. Its files use
-`use_dynamic_url`, so websites can't detect that it's installed. More in [SECURITY.md](SECURITY.md); for how
+There are no host permissions, so the extension can't read or change websites. Its files are
+visible to websites that probe for them, so a site can tell it's installed. More in [SECURITY.md](SECURITY.md); for how
 the code fits together, see the [developer guide](docs/DEVELOPER.md).
 
 Nothing is sent anywhere except Google's sign-in, and only if you choose it.
