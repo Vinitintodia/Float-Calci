@@ -133,20 +133,28 @@ export const evaluate = (input: string): number => {
   const term = (): number => {
     let v = unary();
     for (;;) {
-      if (isOp("*")) (next(), (v *= unary()));
-      else if (isOp("/")) (next(), (v /= unary()));
-      else if (isOp("%")) (next(), (v %= unary()));
-      else if (startsValue()) v *= unary(); // implicit: 2π, 3(4+1)
-      else return v;
+      if (isOp("*") || isOp("/") || isOp("%")) {
+        const op = next().value;
+        const rhs = unary();
+        v = op === "*" ? v * rhs : op === "/" ? v / rhs : v % rhs;
+      } else if (startsValue()) {
+        v *= unary(); // implicit: 2π, 3(4+1)
+      } else {
+        return v;
+      }
     }
   };
 
   const expr = (): number => {
     let v = term();
     for (;;) {
-      if (isOp("+")) (next(), (v += term()));
-      else if (isOp("-")) (next(), (v -= term()));
-      else return v;
+      if (isOp("+") || isOp("-")) {
+        const op = next().value;
+        const rhs = term();
+        v = op === "+" ? v + rhs : v - rhs;
+      } else {
+        return v;
+      }
     }
   };
 

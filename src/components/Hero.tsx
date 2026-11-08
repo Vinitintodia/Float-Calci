@@ -2,19 +2,19 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui-custom/GlassCard";
 import AnimatedText from "@/components/ui-custom/AnimatedText";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Pin } from "lucide-react";
 
 
 /**
  * Hero Component
  * 
- * This is the main landing section of the FloatCalci application.
+ * The main landing section of Float Calci.
  * It displays the app's headline, description, call-to-action buttons,
  * and a preview of the calculator interface.
  */
 const Hero = () => {
   /**
-   * Smooth scrolls to the download section when the Download button is clicked
+   * Smooth scrolls to the download section when "Add to Chrome" is clicked
    */
   const scrollToDownload = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -25,7 +25,7 @@ const Hero = () => {
   };
 
   /**
-   * Smooth scrolls to the demo section when the Watch Demo button is clicked
+   * Smooth scrolls to the live demo when "Try it now" is clicked
    */
   const scrollToDemo = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -47,13 +47,13 @@ const Hero = () => {
           {/* Badge/tag showing the product name */}
           <div className="inline-block animate-fade-in-up">
             <span className="inline-flex items-center rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3 py-1 text-sm font-medium text-brand-blue">
-              Introducing FloatCalci
+              Introducing Float Calci
             </span>
           </div>
 
           {/* Main headline with animation */}
           <AnimatedText
-            text="The Smart Calculator That Listens and Adapts"
+            text="The Calculator That Floats While You Browse"
             element="h1"
             animation="fade-in-up"
             delay={100}
@@ -62,7 +62,7 @@ const Hero = () => {
 
           {/* Subheadline/description with animation */}
           <AnimatedText
-            text="Perform calculations effortlessly with floating calculators. The intelligent interface appears when you need it and elegantly fades away when you don't."
+            text="Basic, scientific and financial calculators that stay on top of every tab and app. Pin one beside your spreadsheet, keep your history, and never switch windows to do a quick sum again."
             element="p"
             animation="fade-in-up"
             delay={200}
@@ -77,7 +77,7 @@ const Hero = () => {
               className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8"
               onClick={scrollToDownload}
             >
-              Download Beta
+              Add to Chrome
             </Button>
             {/* Secondary CTA - Demo button with arrow icon */}
             <Button
@@ -86,7 +86,7 @@ const Hero = () => {
               className="rounded-full px-6 group"
               onClick={scrollToDemo}
             >
-              Watch Demo
+              Try it now
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
@@ -129,25 +129,21 @@ const Hero = () => {
                     ))}
                   </div>
 
-                  {/* Voice command input visualization */}
-                  <div className="mt-6 p-3 bg-brand-gray-light/50 rounded-lg">
-                    <div className="flex items-center">
-                      {/* Microphone icon */}
-                      <div className="w-8 h-8 rounded-full bg-brand-blue/20 flex items-center justify-center text-brand-blue text-xs">
-                        🎤
-                      </div>
-                      {/* Example voice command text */}
-                      <div className="ml-3 text-xs text-brand-gray-medium">
-                        "Calculate twenty-five percent of five hundred"
-                      </div>
-                    </div>
+                  {/* Pinned-on-top badge */}
+                  <div className="mt-6 flex items-center justify-between rounded-lg bg-brand-gray-light/50 p-3 text-xs">
+                    <span className="flex items-center gap-2 font-medium text-brand-blue">
+                      <Pin className="h-3.5 w-3.5" /> Pinned on top
+                    </span>
+                    <kbd className="rounded border border-border bg-card px-1.5 py-0.5 font-mono text-[10px] text-brand-gray-medium">
+                      Alt+Shift+F
+                    </kbd>
                   </div>
                 </div>
               </div>
               {/* Floating caption below the calculator */}
               <div className="absolute bottom-6 left-0 right-0 flex justify-center">
                 <div className="text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-3 py-1 rounded-full">
-                  Elegant interface that follows your cursor
+                  Stays on top while you browse, read or work in other apps
                 </div>
               </div>
             </div>

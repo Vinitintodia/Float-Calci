@@ -1,28 +1,29 @@
 # 🧮 Float Calci
 
-Floating Basic, Scientific and Financial calculators that you can drag around a page, use in dark mode, keep a history of, and **pin on top of every app on your laptop**. Available as a website and as a Chrome extension (Manifest V3).
+**The calculator that floats while you browse.** Basic, Scientific and Financial calculators that you can drag around a page, tuck into the edge of the screen, use in dark mode, keep a history of, and **pin on top of every app on your laptop**. Available as a website and as a Chrome extension (Manifest V3).
 
-![Float Calci](public/demo.png)
+![Float Calci](docs/screenshots/hero.jpg)
 
 ## ✨ Features
 
-- **Three calculators**: Basic, Scientific and Financial (compound interest)
 - **Float on top of all apps**: the green window dot pins the calculator above Excel, PDFs, Zoom and everything else (Chrome / Edge 116+ on desktop)
+- **Magnetic edge tuck**: drag a calculator off the side of the page and it tucks in; bring your cursor near and it slides back out
+- **Financial calculator with exam-calculator keystrokes**: TVM (N, I/Y, PV, PMT, FV, CPT, 2ND), cash flows, NPV, IRR, payback, amortization, bonds, interest conversion and percent change
+- **11 currencies**: ₹, $, €, £, ¥, AED, S$, A$, C$, CHF, CN¥ (or none), with big amounts written out in millions and billions
 - **Chrome extension**: toolbar popup, a floating window, and keyboard shortcuts
-- **Dark theme**: light/dark toggle that follows your system setting by default and remembers your choice
-- **Calculation history**: every result is saved instantly; view, copy or delete it from the History panel
-- **Save prompt on close**: closing a calculator with unsaved work asks for your name or *Continue with Google*
-- **Draggable and minimisable**: macOS-style window controls; fades slightly when you're not using it
-- **Full keyboard support** for all three calculators
-- **Safe evaluation**: no `eval()`; expressions go through a small parser (`src/lib/evaluate.ts`)
+- **Dark theme**: follows your system setting by default and remembers your choice
+- **Calculation history**: every result is saved; closing a calculator asks for your name or *Continue with Google* to keep them
+- **Works on phones**: a menu to open any calculator, sized to fit the screen
+- **Safe maths**: no `eval()`; expressions go through a small parser (`src/lib/evaluate.ts`)
+- **Tested**: 77 automated tests for the maths and the keystroke engine (`npm test`)
 
-| Dark mode | History |
-|---|---|
-| ![Dark mode](docs/screenshots/dark-mode.jpg) | ![History panel](docs/screenshots/history.jpg) |
+| Financial calculator | Dark mode (cash flow → IRR) | On a phone |
+|---|---|---|
+| ![Financial calculator](docs/screenshots/financial.jpg) | ![Dark mode](docs/screenshots/dark-mode.jpg) | ![Mobile](docs/screenshots/mobile.jpg) |
 
-**Chrome extension:** popup, dark mode, and the save prompt
+**Edge tuck**: tucked into the side (left), then sliding out as the cursor comes near (right)
 
-![Chrome extension](docs/screenshots/extension.jpg)
+![Edge tuck](docs/screenshots/edge-tuck.jpg)
 
 ## 🚀 Getting Started
 
@@ -33,14 +34,15 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:8080 and choose a calculator from **Try Calci**.
+Open http://localhost:8080 and choose a calculator from **Try Calci**, or try them in the **Live demo** section.
 
 | Script | What it does |
 |---|---|
 | `npm run dev` | Start the dev server on port 8080 |
 | `npm run build` | Build the website **and** the Chrome extension into `dist/` |
-| `npm run preview` | Preview the production build |
+| `npm test` | Run the test suite (Vitest) |
 | `npm run lint` | Run ESLint |
+| `npm run preview` | Preview the production build |
 
 ## 🧩 Chrome Extension
 
@@ -51,11 +53,81 @@ Open http://localhost:8080 and choose a calculator from **Try Calci**.
 | Action | How |
 |---|---|
 | Open the popup | Toolbar icon or `Alt+Shift+C` |
-| Open the floating window | **Float** button in the popup or `Alt+Shift+F` |
-| Keep it above all apps | **Pin on top** (or the green dot) in the floating window |
+| Open the floating window | Pin button in the popup or `Alt+Shift+F` |
+| Keep it above all apps | **Pin** (or the green dot) in the floating window |
 
-The full guide covers how floating over other apps works, permissions and publishing:
-[CHROME_EXTENSION_GUIDE.md](CHROME_EXTENSION_GUIDE.md)
+![Extension popup](docs/screenshots/extension.jpg)
+
+Full guide (how floating over other apps works, Google sign-in, permissions, publishing): [CHROME_EXTENSION_GUIDE.md](CHROME_EXTENSION_GUIDE.md)
+
+## 💰 Financial Calculator
+
+It follows the keystroke workflow taught for finance exams, so what you practise here carries over to a handheld financial calculator.
+
+**Sign convention:** money you receive is positive, money you pay is negative (a loan: `PV = +5,000,000`, `PMT` comes out negative).
+
+### Time value of money
+
+| Key | Meaning |
+|---|---|
+| `N` | Number of payments |
+| `I/Y` | Annual interest rate, % |
+| `PV` / `PMT` / `FV` | Present value, payment per period, future value |
+| `CPT` | Compute: press it, then the key you want solved |
+| `2ND` `I/Y` (P/Y) | Payments per year (also sets compounding per year, C/Y) |
+| `2ND` `PMT` (BGN) | Payments at the end (END) or beginning (BGN) of each period |
+| `2ND` `N` (xP/Y) | Multiply the display by P/Y (30 years → 360 months) |
+| `2ND` `FV` (CLR TVM) | Clear the five TVM values |
+
+**Example: EMI on a ₹50 lakh home loan, 8.5% for 30 years**
+
+```
+2ND I/Y  12 ENTER  2ND CPT      (P/Y = 12, back to the calculator)
+360 N   8.5 I/Y   5000000 PV   0 FV
+CPT PMT                          → PMT = −₹38,445.67
+```
+
+### Worksheets
+
+Open a worksheet, move with `↑` `↓`, type a value and press `ENTER`, or press `CPT` to compute. `2ND CPT` (QUIT) goes back to the standard calculator. The chips under the display jump straight to any variable.
+
+| Worksheet | Open with | Variables |
+|---|---|---|
+| Cash flows | `CF` | CF0, C01/F01, C02/F02 … (`2ND ↑` deletes, `2ND ↓` inserts a flow) |
+| NPV | `NPV` | I (rate) → NPV, NFV, PB (payback), DPB (discounted payback) |
+| IRR | `IRR` | IRR (press `CPT`) |
+| Amortization | `2ND PV` | P1, P2 → BAL, PRN, INT |
+| Bond | `BOND` | RV, CPN, YRS, FREQ (`2ND ENTER` switches 2/Y and 1/Y) → YLD ⇄ PRI, DUR, MDUR |
+| Interest conversion | `2ND %` | NOM ⇄ EFF, C/Y |
+| Percent change | `Δ%` | OLD, NEW, %CH, #PD (solve any one) |
+
+**Example: NPV and IRR of a project**
+
+```
+CF  1000000 +/- ENTER  ↓  300000 ENTER  ↓  4 ENTER    (−10 lakh, then 3 lakh for 4 years)
+NPV  10 ENTER  ↓  CPT                                  → NPV at 10%
+IRR  CPT                                               → IRR = 7.71%
+```
+
+The standard calculator chains left to right (`2 + 3 × 4 = 20`), and has `%`, `yˣ`, `√x`, `x²`, `1/x`, `LN`, `eˣ`, `STO`/`RCL` 0–9 memories, and `2ND +/-` (RESET, asks first). Your values are kept between sessions, like a real calculator's memory.
+
+The bond worksheet works in whole coupon periods (years to maturity), not settlement dates.
+
+## 🔢 Basic & Scientific
+
+**Basic**: arithmetic, percent, plus/minus, decimals and backspace. After `=`, typing a number starts a new calculation, while an operator carries on from the result.
+
+**Scientific**: `sin` `cos` `tan` (degrees), `log`, `ln`, `√`, powers (`^`, `x²`, `x³`), brackets, `π`, `e`, `EXP` (`1.5 EXP 3` = 1500), `×10^`, and `Ans` (the last answer). Implicit multiplication such as `2π` or `3(4+1)` works, and missing closing brackets are added for you.
+
+## ⌨️ Keyboard Shortcuts
+
+| Calculator | Keys |
+|---|---|
+| Basic | `0–9` `+ - * / . %` · `Enter` = · `Backspace` delete · `Esc` clear |
+| Scientific | `0–9` `+ - * / ^ ( )` · `s` sin · `c` cos · `t` tan · `l` log · `r` √ · `p` π · `Space` close bracket · `Backspace` delete · `Esc` clear · `Enter` = |
+| Financial | `0–9` `.` `+ - * / ^ %` · `n` N · `i` I/Y · `p` PV · `m` PMT · `f` FV · `c` CPT · `s` 2ND · `↑ ↓` move · `Enter` ENTER (or = outside a worksheet) · `Backspace` delete · `Esc` CE/C |
+
+On the landing page, the demo calculators only take the keyboard after you click them, so arrow keys still scroll the page.
 
 ## 💾 History & Sign-in
 
@@ -71,29 +143,9 @@ VITE_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
 
 The step-by-step setup is in the [extension guide](CHROME_EXTENSION_GUIDE.md#setting-up-continue-with-google). Without a client ID, saving by name still works.
 
-## 🔢 Calculators
-
-### Basic
-Arithmetic (`+ − × ÷`), percent, plus/minus, decimals.
-
-### Scientific
-`sin` `cos` `tan` (in degrees), `log` (base 10), `ln`, `√`, powers (`^`, `x²`, `x³`), brackets, and the constants `π` and `e`.
-Implicit multiplication such as `2π` or `3(4+1)` works, and missing closing brackets are added for you (`sin(30` → `0.5`). Undefined results such as `tan(90)` show **Error**.
-
-### Financial
-Compound interest, `A = P(1 + r)ⁿ`: enter Principal, Rate (%) and Time (years) to get the final amount and the interest earned.
-
-## ⌨️ Keyboard Shortcuts
-
-| Calculator | Keys |
-|---|---|
-| Basic | `0–9` `+ - * / . %` · `Enter` = · `Esc` / `Backspace` clear |
-| Scientific | `0–9` `+ - * / ^ ( )` · `s` sin · `c` cos · `t` tan · `l` log · `r` √ · `p` π · `Space` close bracket · `Backspace` delete · `Esc` clear · `Enter` = |
-| Financial | `0–9` `.` · `Tab` / arrow keys switch field · `Enter` calculate · `Backspace` delete · `Esc` / `C` clear field |
-
 ## 🛠️ Tech Stack
 
-React 18 · TypeScript · Vite · Tailwind CSS · shadcn/ui (Radix) · Lucide icons · Chrome Extension Manifest V3 · Document Picture-in-Picture API · Google Identity Services
+React 18 · TypeScript · Vite · Tailwind CSS · shadcn/ui (Radix) · Lucide icons · Vitest · Chrome Extension Manifest V3 · Document Picture-in-Picture API · Google Identity Services
 
 ## 📁 Project Structure
 
@@ -101,20 +153,25 @@ React 18 · TypeScript · Vite · Tailwind CSS · shadcn/ui (Radix) · Lucide ic
 src/
 ├── components/
 │   ├── calculator/
-│   │   ├── CalculatorShell.tsx   # shared window: drag, minimise, keyboard, float-on-top
-│   │   └── CalculatorHost.tsx    # floating (website) vs docked (extension) behaviour
+│   │   ├── CalculatorShell.tsx   # shared window: drag, edge tuck, keyboard, float-on-top
+│   │   └── CalculatorHost.tsx    # floating (website) vs docked (demo, extension)
 │   ├── FloatingCalculator.tsx    # Basic
 │   ├── ScientificCalculator.tsx
-│   ├── FinancialCalculator.tsx
+│   ├── FinancialCalculator.tsx   # financial keypad, display and currency picker
+│   ├── AppDemo.tsx               # live demo on the landing page
 │   ├── HistoryPanel.tsx
 │   ├── SaveCalculationsDialog.tsx
 │   └── ThemeToggle.tsx
 ├── lib/
+│   ├── finance.ts                # TVM, NPV, IRR, amortization, bonds… (pure maths)
+│   ├── finCalc.ts                # financial keystroke engine (2ND, CPT, worksheets)
+│   ├── currency.ts               # currencies and number formatting
 │   ├── evaluate.ts               # safe expression parser
 │   ├── history.ts                # history + profile store
 │   ├── storage.ts                # chrome.storage / localStorage
 │   ├── theme.ts                  # light / dark / system
-│   └── googleAuth.ts             # Google sign-in (web + extension)
+│   ├── googleAuth.ts             # Google sign-in (web + extension)
+│   └── *.test.ts                 # tests
 ├── extension/background.ts       # extension service worker
 ├── pages/Index.tsx               # website
 └── popup.tsx                     # extension popup + floating window
@@ -124,10 +181,11 @@ public/manifest.json              # Manifest V3
 ## 🗺️ Roadmap
 
 - Sync history across devices (Firebase or Supabase, keyed by Google account)
-- Wire up the remaining financial keys: NPV, IRR, PMT, FV, amortisation
-- `Ans` and `EXP` keys on the scientific calculator
-- Desktop app (Tauri/Electron) so it can float even with Chrome closed
+- Live currency conversion when you switch currency
+- Date-based bond pricing (settlement and maturity dates), depreciation and statistics worksheets
+- Publish to the Chrome Web Store
+- Desktop app (Tauri) so it can float even with Chrome closed
 
 ## 🤝 Contributing
 
-Pull requests are welcome. For bigger changes, please open an issue first to discuss what you'd like to change.
+Pull requests are welcome. Run `npm test` and `npm run lint` before opening one. For bigger changes, please open an issue first to discuss what you'd like to change.

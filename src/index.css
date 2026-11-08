@@ -150,6 +150,19 @@
   --calc-field-active: #f0f8ff;
   --calc-result-bg: #f9f9f9;
   --calc-window-bg: #f5f5f5;
+
+  /* Financial calculator */
+  --calc-lcd: #dfe7d6;
+  --calc-lcd-text: #1d2a1a;
+  --calc-lcd-dim: rgba(29, 42, 26, 0.55);
+  --calc-lcd-border: #b9c6ae;
+  --calc-2nd: #f59e0b;
+  --calc-2nd-text: #fff;
+  --calc-2nd-label: #c2410c;
+  --calc-ctl: #e3e7ee;
+  --calc-ctl-text: #1f2937;
+  --calc-cpt: #7c5cff;
+  --calc-cpt-text: #fff;
 }
 
 .dark {
@@ -181,6 +194,18 @@
   --calc-field-active: #1a2b40;
   --calc-result-bg: #151a24;
   --calc-window-bg: #0f121a;
+
+  --calc-lcd: #0e1f1c;
+  --calc-lcd-text: #8ff0d6;
+  --calc-lcd-dim: rgba(143, 240, 214, 0.55);
+  --calc-lcd-border: #1d3b35;
+  --calc-2nd: #d97706;
+  --calc-2nd-text: #fff;
+  --calc-2nd-label: #fbbf24;
+  --calc-ctl: #343c50;
+  --calc-ctl-text: #e5e9f0;
+  --calc-cpt: #7c5cff;
+  --calc-cpt-text: #fff;
 }
 
 @layer base {

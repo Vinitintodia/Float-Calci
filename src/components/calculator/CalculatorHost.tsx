@@ -14,6 +14,14 @@ export interface CalculatorHost {
   floatLabel?: string;
   /** Called when the always-on-top window opens or closes. */
   onAlwaysOnTopChange?: (active: boolean) => void;
+  /**
+   * Take keyboard input as soon as it appears (default true). The demo
+   * calculators embedded in the landing page set this to false, so they only
+   * listen to the keyboard after you click them.
+   */
+  autoKeyboard?: boolean;
+  /** Tighter layout for small spaces (the Chrome toolbar popup is max 600px tall). */
+  compact?: boolean;
 }
 
 const defaultHost: CalculatorHost = {

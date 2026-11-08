@@ -9,19 +9,20 @@ interface FloatingCalculatorProps {
   onKeyboardInput?: (key: string) => void;
 }
 
-const OPERATOR_KEYS = ["C", "±", "%", "/", "*", "-", "+", "="];
+const OPERATOR_KEYS = ["C", "±", "%", "/", "*", "-", "+", "=", "⌫"];
 
 const buttons = [
   ["C", "±", "%", "/"],
   ["7", "8", "9", "*"],
   ["4", "5", "6", "-"],
   ["1", "2", "3", "+"],
-  ["0", ".", "=", ""],
+  ["0", ".", "⌫", "="],
 ];
 
 const keyMap: Record<string, string> = {
   Escape: "C",
-  Backspace: "C",
+  Delete: "C",
+  Backspace: "⌫",
   "/": "/",
   "*": "*",
   "-": "-",
@@ -42,6 +43,8 @@ const formatDisplay = (value: string): string => {
 const FloatingCalculator: React.FC<FloatingCalculatorProps> = ({ input, onInputChange }) => {
   const [expression, setExpression] = useState<string>(input || "");
   const [showCursor, setShowCursor] = useState(true);
+  // True right after "=": the next digit starts a new calculation
+  const [justEvaluated, setJustEvaluated] = useState(false);
 
   // Blinking cursor
   useEffect(() => {
@@ -60,8 +63,12 @@ const FloatingCalculator: React.FC<FloatingCalculatorProps> = ({ input, onInputC
   };
 
   const handleClick = (val: string) => {
+    const wasResult = justEvaluated;
+    setJustEvaluated(false);
     if (val === "C") {
       set("");
+    } else if (val === "⌫") {
+      set(expression === "Error" ? "" : expression.slice(0, -1));
     } else if (val === "±") {
       set(expression.charAt(0) === "-" ? expression.slice(1) : "-" + expression);
     } else if (val === "%") {
@@ -77,12 +84,14 @@ const FloatingCalculator: React.FC<FloatingCalculatorProps> = ({ input, onInputC
           : "Error";
         recordCalculation("basic", expression, newValue);
         set(newValue);
+        setJustEvaluated(newValue !== "Error");
       } catch (error) {
         console.error("Calculation error:", error);
         set("Error");
       }
-    } else if (expression === "Error") {
-      set(val);
+    } else if (expression === "Error" || (wasResult && /^[0-9.]$/.test(val))) {
+      // After a result (or an error), typing a number starts fresh
+      set(val === "." ? "0." : val);
     } else {
       // Prevent multiple consecutive operators
       const operators = ["+", "-", "*", "/", "%"];
@@ -147,6 +156,7 @@ const FloatingCalculator: React.FC<FloatingCalculatorProps> = ({ input, onInputC
             key={idx}
             onClick={() => handleClick(val)}
             disabled={val === ""}
+            aria-label={val === "⌫" ? "Backspace" : undefined}
             style={{
               padding: "1rem",
               fontSize: "1.1rem",

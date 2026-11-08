@@ -54,6 +54,9 @@ const formatResult = (result: number): string => {
 
 const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ input, onInputChange }) => {
   const [expression, setExpression] = useState<string>(input || "");
+  const [lastAnswer, setLastAnswer] = useState<string>("0");
+  // True right after "=": typing a number starts a new calculation
+  const [justEvaluated, setJustEvaluated] = useState(false);
 
   useEffect(() => {
     if (input !== undefined) setExpression(input);
@@ -70,6 +73,10 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ input, onIn
       const newValue = formatResult(evaluate(expression));
       recordCalculation("scientific", expression, newValue);
       set(newValue);
+      if (newValue !== "Error") {
+        setLastAnswer(newValue);
+        setJustEvaluated(true);
+      }
     } catch (error) {
       console.error("Scientific calculation error:", error);
       set("Error");
@@ -77,35 +84,57 @@ const ScientificCalculator: React.FC<ScientificCalculatorProps> = ({ input, onIn
   };
 
   const handleClick = (val: string) => {
+    const wasResult = justEvaluated;
+    setJustEvaluated(false);
+    // After a result, starting a new number / function begins a new calculation;
+    // operators carry on from the result.
+    const startsValue = /^[0-9.]$/.test(val) || ["sin", "cos", "tan", "log", "ln", "√", "(", "π", "e", "Ans"].includes(val);
+    const base = expression === "Error" || (wasResult && startsValue) ? "" : expression;
+    const endsWithValue = /[0-9)πe]$/.test(base) && !/E$/.test(base);
+
     if (val === "C") {
       set("");
     } else if (val === "⌫") {
-      set(expression.slice(0, -1));
+      set(expression === "Error" ? "" : expression.slice(0, -1));
     } else if (val === "=") {
       calculate();
     } else if (val === "x²" || val === "x³") {
-      const num = parseFloat(expression);
-      if (!isNaN(num)) {
-        const newValue = (val === "x²" ? num * num : num * num * num).toString();
-        recordCalculation("scientific", `${expression}${val === "x²" ? "²" : "³"}`, newValue);
+      try {
+        const num = evaluate(expression);
+        const newValue = formatResult(val === "x²" ? num * num : num * num * num);
+        recordCalculation("scientific", `(${expression})${val === "x²" ? "²" : "³"}`, newValue);
         set(newValue);
+        if (newValue !== "Error") {
+          setLastAnswer(newValue);
+          setJustEvaluated(true);
+        }
+      } catch {
+        set("Error");
       }
+    } else if (val === "Ans") {
+      // Insert the last answer (multiplying if it follows a number)
+      set(base + (endsWithValue ? "×" : "") + lastAnswer);
+    } else if (val === "EXP") {
+      // Scientific notation: 1.5 EXP 3 = 1.5E3 = 1500
+      if (/[0-9]$/.test(base) && !/E-?[0-9]*$/.test(base)) set(base + "E");
+    } else if (val === "×10^") {
+      set(base + (base === "" ? "1" : "") + "×10^");
     } else if (val === "√") {
-      set(expression + "sqrt(");
+      set(base + (endsWithValue ? "×" : "") + "sqrt(");
     } else if (["sin", "cos", "tan", "log", "ln"].includes(val)) {
-      set(expression + val + "(");
+      set(base + (endsWithValue ? "×" : "") + val + "(");
     } else if (val === "(" || val === "π" || val === "e") {
-      set(expression + val);
-    } else if (expression === "Error") {
-      set(val);
+      set(base + val);
+    } else if (val === "-" && /E$/.test(base)) {
+      set(base + "-"); // negative exponent: 1.5E-3
     } else {
       // Prevent multiple consecutive operators
       const operators = ["+", "-", "*", "/", "%", "^"];
-      const lastChar = expression.slice(-1);
+      const lastChar = base.slice(-1);
       if (operators.includes(val) && operators.includes(lastChar)) {
-        set(expression.slice(0, -1) + val);
+        set(base.slice(0, -1) + val);
       } else {
-        set(expression + val);
+        set(base + val);
       }
     }
   };

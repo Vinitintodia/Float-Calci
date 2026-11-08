@@ -53,6 +53,7 @@ const ExtensionApp = () => {
     surface === "popup"
       ? {
           docked: true,
+          compact: true,
           requestClose,
           // The toolbar popup closes when it loses focus, so it can't host an
           // always-on-top window itself; open the separate window instead.
@@ -66,29 +67,45 @@ const ExtensionApp = () => {
       className={cn("text-foreground", surface === "popup" ? "w-[380px]" : "min-h-screen w-full")}
       style={{ background: "var(--calc-window-bg)" }}
     >
-      <header className="flex items-center gap-2 px-3 pb-2 pt-3">
-        <span className="mr-auto text-sm font-bold text-brand-blue">Float Calci</span>
+      <header className="flex items-center gap-1.5 px-2.5 pb-2 pt-2.5">
+        <nav className="flex flex-1 gap-0.5 rounded-xl bg-card p-0.5 shadow-sm" role="tablist" aria-label="Calculator">
+          {TABS.map((t) => (
+            <button
+              key={t.type}
+              role="tab"
+              aria-selected={type === t.type}
+              onClick={() => setType(t.type)}
+              className={cn(
+                "flex-1 rounded-lg px-1.5 py-1.5 text-xs font-medium transition-colors",
+                type === t.type ? "bg-brand-blue text-white" : "text-muted-foreground hover:bg-accent hover:text-foreground",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
         {surface === "window" && supportsAlwaysOnTop() && (
           <button
             onClick={() => window.dispatchEvent(new Event(PIN_EVENT))}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-blue px-3 text-xs font-medium text-white hover:bg-brand-blue/90"
+            className="inline-flex h-8 items-center gap-1 rounded-full bg-brand-blue px-2.5 text-xs font-medium text-white hover:bg-brand-blue/90"
             title="Keep the calculator above all your apps"
           >
-            <Pin className="h-3.5 w-3.5" /> Pin on top
+            <Pin className="h-3.5 w-3.5" /> Pin
           </button>
         )}
         {surface === "popup" && (
           <button
             onClick={() => void openFloatingWindow(type)}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full border border-border px-3 text-xs font-medium hover:bg-accent"
-            title="Open in its own window that you can pin above all apps"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-accent"
+            title="Float: open in its own window that you can pin above all apps"
+            aria-label="Float"
           >
-            <Pin className="h-3.5 w-3.5" /> Float
+            <Pin className="h-3.5 w-3.5" />
           </button>
         )}
         <button
           onClick={() => setHistoryOpen(true)}
-          className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border hover:bg-accent"
+          className="relative inline-flex h-8 w-8 items-center justify-center rounded-full border border-border hover:bg-accent"
           aria-label="Calculation history"
           title="History"
         >
@@ -99,27 +116,10 @@ const ExtensionApp = () => {
             </span>
           )}
         </button>
-        <ThemeToggle />
+        <ThemeToggle className="h-8 w-8" />
       </header>
 
-      <nav className="mx-3 mb-3 flex gap-1 rounded-xl bg-card p-1 shadow-sm" role="tablist">
-        {TABS.map((t) => (
-          <button
-            key={t.type}
-            role="tab"
-            aria-selected={type === t.type}
-            onClick={() => setType(t.type)}
-            className={cn(
-              "flex-1 rounded-lg px-2 py-1.5 text-sm font-medium transition-colors",
-              type === t.type ? "bg-brand-blue text-white" : "text-muted-foreground hover:bg-accent hover:text-foreground",
-            )}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
-
-      <main className="px-3 pb-3">
+      <main className="px-2.5 pb-2.5">
         <CalculatorHostContext.Provider value={host}>
           <CalculatorManager key={type} type={type} />
         </CalculatorHostContext.Provider>

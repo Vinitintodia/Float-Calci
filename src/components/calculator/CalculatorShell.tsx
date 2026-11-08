@@ -25,6 +25,31 @@ declare global {
 
 export const PIN_EVENT = "floatcalci:always-on-top";
 
+const isTouchScreen = () => typeof window !== "undefined" && window.matchMedia("(hover: none)").matches;
+
+// Edge tuck: width of the tab left on screen, and how close the cursor must come.
+const TAB = 28;
+const MAGNET = 70;
+const LEAVE = 40;
+
+// Which calculator gets keyboard input (see the keyboard effect below).
+let nextShellId = 1;
+let activeShell = 0;
+const autoShells: number[] = [];
+
+if (typeof document !== "undefined") {
+  // Clicking a calculator gives it the keyboard; clicking elsewhere hands it
+  // back to the newest floating calculator (if any).
+  document.addEventListener(
+    "pointerdown",
+    (e) => {
+      const el = (e.target as HTMLElement | null)?.closest?.("[data-shell-id]");
+      activeShell = el ? Number(el.getAttribute("data-shell-id")) : autoShells[autoShells.length - 1] ?? 0;
+    },
+    true,
+  );
+}
+
 interface CalculatorShellProps {
   type: CalculatorType;
   title: string;
@@ -80,7 +105,13 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
   const [pipWindow, setPipWindow] = useState<Window | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [offset, setOffset] = useState(defaultPosition);
+  // Fit small screens (phones): never wider than the viewport, start fully visible.
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
+  width = Math.min(width, vw - 16);
+  const [offset, setOffset] = useState(() => ({
+    x: Math.max(8, Math.min(defaultPosition.x, vw - width - 8)),
+    y: vw < 640 ? 72 : defaultPosition.y,
+  }));
   const calcRef = useRef<HTMLDivElement>(null);
   const dragStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -91,10 +122,27 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
   // ---- Keyboard: always call the latest handler, on the right window -----
   const keyHandler = useRef(onKeyDown);
   keyHandler.current = onKeyDown;
+  const [shellId] = useState(() => nextShellId++);
+  const autoKeyboard = host.autoKeyboard !== false;
+
+  // Only one calculator takes the keyboard: the one you last clicked, or the
+  // newest floating one.
+  useEffect(() => {
+    if (autoKeyboard) {
+      autoShells.push(shellId);
+      activeShell = shellId;
+    }
+    return () => {
+      const i = autoShells.indexOf(shellId);
+      if (i >= 0) autoShells.splice(i, 1);
+      if (activeShell === shellId) activeShell = autoShells[autoShells.length - 1] ?? 0;
+    };
+  }, [shellId, autoKeyboard]);
 
   useEffect(() => {
     const target: Window = pipWindow ?? window;
     const listener = (e: KeyboardEvent) => {
+      if (!pipWindow && activeShell !== shellId) return;
       const el = e.target as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
       // Don't type into the calculator while a dialog (e.g. save prompt) is open.
@@ -103,31 +151,156 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
     };
     target.addEventListener("keydown", listener);
     return () => target.removeEventListener("keydown", listener);
-  }, [pipWindow]);
+  }, [pipWindow, shellId]);
 
-  // ---- Dragging (website only) -------------------------------------------
-  useEffect(() => {
-    const move = (e: PointerEvent) => {
-      if (!dragStart.current) return;
+  // ---- Dragging, staying on screen, and the magnetic edge tuck (website only)
+  //
+  // * The calculator can't get lost: if the window shrinks or the calculator
+  //   grows, it slides back into view.
+  // * Drag it mostly past the left/right edge and it tucks in, leaving a small
+  //   tab. Bring the cursor near the tab (or tap it) and it slides out like a
+  //   magnet; move away and it tucks back. Drag it in to keep it out.
+  const [viewport, setViewport] = useState(() => ({ w: vw, h: typeof window !== "undefined" ? window.innerHeight : 768 }));
+  const [tuck, setTuck] = useState<"left" | "right" | null>(null);
+  const [peek, setPeek] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const unpeekTimer = useRef<number | undefined>(undefined);
+
+  /** Keep the calculator fully on screen (vertically always; horizontally unless tucked). */
+  const clampToView = useCallback(
+    (pos: { x: number; y: number }, allowOffscreenX = false) => {
       const w = calcRef.current?.offsetWidth ?? width;
       const h = calcRef.current?.offsetHeight ?? 400;
-      setOffset({
-        x: Math.max(0, Math.min(e.clientX - dragStart.current.x, window.innerWidth - w)),
-        y: Math.max(0, Math.min(e.clientY - dragStart.current.y, window.innerHeight - h)),
-      });
+      const vwNow = window.innerWidth;
+      const vhNow = window.innerHeight;
+      const x = allowOffscreenX
+        ? Math.max(-w + TAB, Math.min(pos.x, vwNow - TAB))
+        : Math.max(0, Math.min(pos.x, vwNow - w));
+      const y = Math.max(0, Math.min(pos.y, Math.max(0, vhNow - h)));
+      return { x, y };
+    },
+    [width],
+  );
+
+  // Window resized, or the calculator changed size (minimise, worksheet chips…)
+  useEffect(() => {
+    if (docked) return;
+    const refit = () => {
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+      setOffset((o) => clampToView(o));
     };
-    const up = () => (dragStart.current = null);
+    window.addEventListener("resize", refit);
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(refit) : null;
+    if (ro && calcRef.current) ro.observe(calcRef.current);
+    return () => {
+      window.removeEventListener("resize", refit);
+      ro?.disconnect();
+    };
+  }, [docked, clampToView]);
+
+  // Where the panel is drawn
+  const { w: panelW } = { w: calcRef.current?.offsetWidth ?? width };
+  const shownX = !tuck
+    ? offset.x
+    : tuck === "left"
+      ? peek
+        ? 8
+        : -panelW + TAB
+      : peek
+        ? viewport.w - panelW - 8
+        : viewport.w - TAB;
+
+  // Latest values for the document listeners below
+  const live = useRef({ tuck, peek, dragging });
+  live.current = { tuck, peek, dragging };
+  const offsetRef = useRef(offset);
+  offsetRef.current = offset;
+
+  useEffect(() => {
+    if (docked) return;
+
+    const move = (e: PointerEvent) => {
+      // Dragging
+      if (dragStart.current) {
+        setOffset(clampToView({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y }, true));
+        return;
+      }
+      // Magnet: only for a mouse/pen hovering near a tucked calculator
+      const { tuck: t, peek: p } = live.current;
+      if (!t || e.pointerType === "touch" || !calcRef.current) return;
+      const r = calcRef.current.getBoundingClientRect();
+      const nearY = e.clientY > r.top - MAGNET && e.clientY < r.bottom + MAGNET;
+      if (!p) {
+        const nearX = t === "left" ? e.clientX < TAB + MAGNET : e.clientX > window.innerWidth - TAB - MAGNET;
+        if (nearX && nearY) {
+          window.clearTimeout(unpeekTimer.current);
+          setPeek(true);
+        }
+      } else {
+        const inside =
+          e.clientX > r.left - LEAVE && e.clientX < r.right + LEAVE && e.clientY > r.top - LEAVE && e.clientY < r.bottom + LEAVE;
+        if (inside) window.clearTimeout(unpeekTimer.current);
+        else if (unpeekTimer.current === undefined || unpeekTimer.current === -1) {
+          unpeekTimer.current = window.setTimeout(() => {
+            unpeekTimer.current = -1;
+            setPeek(false);
+          }, 500);
+        }
+      }
+    };
+
+    const up = () => {
+      if (!dragStart.current) return;
+      dragStart.current = null;
+      setDragging(false);
+      const w = calcRef.current?.offsetWidth ?? width;
+      const o = offsetRef.current;
+      if (o.x < -w * 0.35) {
+        setTuck("left");
+        setPeek(false);
+      } else if (o.x + w > window.innerWidth + w * 0.35) {
+        setTuck("right");
+        setPeek(false);
+      } else {
+        setTuck(null);
+        setOffset(clampToView(o)); // snap back fully on screen
+      }
+    };
+
+    // Touch: tap outside a peeking calculator to tuck it away again
+    const down = (e: PointerEvent) => {
+      const { tuck: t, peek: p } = live.current;
+      if (t && p && calcRef.current && !calcRef.current.contains(e.target as Node)) setPeek(false);
+    };
+
     document.addEventListener("pointermove", move);
     document.addEventListener("pointerup", up);
+    document.addEventListener("pointerdown", down);
     return () => {
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerup", up);
+      document.removeEventListener("pointerdown", down);
+      window.clearTimeout(unpeekTimer.current);
     };
-  }, [width]);
+  }, [docked, clampToView, width]);
 
   const startDrag = (e: React.PointerEvent) => {
     if (docked) return;
-    dragStart.current = { x: e.clientX - offset.x, y: e.clientY - offset.y };
+    // Pick it up from wherever it is shown (tucked or peeking)
+    const from = { x: shownX, y: offset.y };
+    if (tuck) {
+      setTuck(null);
+      setPeek(false);
+      setOffset(from);
+    }
+    setDragging(true);
+    dragStart.current = { x: e.clientX - from.x, y: e.clientY - from.y };
+  };
+
+  /** Tapping a tucked calculator slides it out (touch has no hover). */
+  const onPanelPointerDown = () => {
+    activeShell = shellId;
+    if (tuck && !peek) setPeek(true);
   };
 
   // ---- Always on top -------------------------------------------------------
@@ -187,16 +360,20 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
   };
 
   // ---- Render --------------------------------------------------------------
-  const faded = !docked && !isHovered;
+  // Fades a little when you're not using it (not on touch screens: no hover there)
+  const faded = !docked && !isHovered && !(tuck && peek) && !isTouchScreen();
+  const tucked = !docked && !!tuck && !peek;
 
   const panel = (
     <div
       ref={calcRef}
       data-calculator={type}
+      data-shell-id={shellId}
+      onPointerDownCapture={onPanelPointerDown}
       style={{
         ...(docked
           ? { position: "relative", width: "100%" }
-          : { position: "fixed", top: offset.y, left: offset.x, width, zIndex: 1000 }),
+          : { position: "fixed", top: offset.y, left: shownX, width, zIndex: 1000 }),
         borderRadius: pipWindow ? 0 : 16,
         boxShadow: pipWindow ? "none" : "var(--calc-shadow)",
         backgroundColor: "var(--calc-surface)",
@@ -204,17 +381,45 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
         userSelect: "none",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        opacity: faded ? 0.7 : 1,
-        transition: "opacity 0.3s ease, background-color 0.3s ease",
+        opacity: faded ? 0.82 : 1,
+        transition: dragging
+          ? "opacity 0.3s ease, background-color 0.3s ease"
+          : "opacity 0.3s ease, background-color 0.3s ease, left 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15), top 0.2s ease",
         overflow: "hidden",
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Edge tab while tucked: hover near it or tap it to bring the calculator back */}
+      {tucked && (
+        <div
+          data-testid="tuck-tab"
+          title="Bring the calculator back"
+          style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            [tuck === "left" ? "right" : "left"]: 0,
+            width: TAB,
+            zIndex: 2,
+            background: "var(--calc-op)",
+            color: "var(--calc-op-text)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: 18,
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          {tuck === "left" ? "›" : "‹"}
+        </div>
+      )}
+
       {/* Title bar */}
       <div
         style={{
-          padding: "0.75rem 1rem",
+          padding: host.compact ? "0.45rem 0.75rem" : "0.75rem 1rem",
           background: faded ? "var(--calc-titlebar-dim)" : "var(--calc-titlebar)",
           fontWeight: 500,
           borderBottom: isMinimized ? "none" : "1px solid var(--calc-border)",

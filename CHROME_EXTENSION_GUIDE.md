@@ -5,8 +5,8 @@ Float Calci runs in three places, all from the same code:
 | Where | How you open it | What it's for |
 |---|---|---|
 | **Toolbar popup** | Click the extension icon, or `Alt+Shift+C` | Quick sums |
-| **Floating window** | **Float** button in the popup, or `Alt+Shift+F` | A small calculator window of its own |
-| **On top of all apps** | **Pin on top** in the floating window (or its green dot) | Stays above every app on your laptop: Excel, PDFs, Zoom… |
+| **Floating window** | Pin button in the popup header, or `Alt+Shift+F` | A small calculator window of its own |
+| **On top of all apps** | **Pin** in the floating window (or its green dot) | Stays above every app on your laptop: Excel, PDFs, Zoom… |
 
 ## How "float over the whole laptop" works
 
@@ -43,7 +43,7 @@ Shortcuts can be changed at `chrome://extensions/shortcuts`.
 
 ## Calculation history and saving
 
-* Every result (pressing **=**, **x²**, **x³**, or **Calc** on the financial calculator) is stored right away:
+* Every result (pressing **=**, **x²**, **x³**, or **CPT** on the financial calculator) is stored right away:
   in `chrome.storage.local` in the extension, and in `localStorage` on the website.
 * When you close a calculator (red dot) with unsaved calculations, a popup asks for your **name** or
   **Continue with Google**. Your calculations are then attached to that profile, and future ones save automatically.
@@ -84,6 +84,12 @@ your name, email and photo.
 * **identity**: the Google sign-in window.
 
 Nothing is sent anywhere except Google's sign-in, and only if you choose it.
+
+## Financial calculator in the popup
+
+The toolbar popup is limited to 600px tall, so the financial calculator uses a compact layout there (the
+hints become a tooltip on the display). The floating window and the website show the full layout.
+Your TVM values, cash flows and memories are kept between sessions in `chrome.storage.local`.
 
 ## Why the calculators no longer use `eval`
 

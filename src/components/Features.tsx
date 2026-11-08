@@ -1,40 +1,40 @@
 
 import React from 'react';
 import GlassCard from "@/components/ui-custom/GlassCard";
-import { Mic, Calculator, Settings, History, Layers, Zap } from "lucide-react";
+import { Pin, Calculator, Keyboard, History, Coins, Moon } from "lucide-react";
 import AnimatedText from "@/components/ui-custom/AnimatedText";
 
 const features = [
   {
-    icon: <Mic className="h-6 w-6 text-brand-blue" />,
-    title: "Keyboard Shortcuts",
-    description: "Use keyboard shortcuts for faster calculations. Type naturally with full keyboard support."
+    icon: <Pin className="h-6 w-6 text-brand-blue" />,
+    title: "Floats Over Everything",
+    description: "Pin the calculator above every tab and app with one click, and keep it there while you browse or work.",
   },
   {
     icon: <Calculator className="h-6 w-6 text-brand-blue" />,
-    title: "Multiple Modes",
-    description: "Choose between Basic, Scientific, and Financial calculators to suit your needs."
+    title: "Three Calculators",
+    description: "Basic, Scientific, and a full financial calculator with TVM, NPV, IRR, amortization and bond worksheets.",
   },
   {
-    icon: <Layers className="h-6 w-6 text-brand-blue" />,
-    title: "Context-Aware UI",
-    description: "The interface appears near your cursor and adapts its transparency based on usage."
-  },
-  {
-    icon: <Zap className="h-6 w-6 text-brand-blue" />,
-    title: "Smart Number Formatting",
-    description: "Results are displayed with appropriate abbreviations (K, M, B, T) for readability."
-  },
-  {
-    icon: <Settings className="h-6 w-6 text-brand-blue" />,
-    title: "Customizable Settings",
-    description: "Personalize shortcuts, themes, and default modes to match your preferences."
+    icon: <Keyboard className="h-6 w-6 text-brand-blue" />,
+    title: "Keyboard First",
+    description: "Every key has a shortcut. Open the calculator with Alt+Shift+C and the floating window with Alt+Shift+F.",
   },
   {
     icon: <History className="h-6 w-6 text-brand-blue" />,
     title: "Calculation History",
-    description: "Access your recent calculations for reference or reuse with a simple gesture."
-  }
+    description: "Every result is saved. Keep them under your name or Google account, then copy any result back with a click.",
+  },
+  {
+    icon: <Coins className="h-6 w-6 text-brand-blue" />,
+    title: "Your Currency",
+    description: "Rupees, dollars, euros, pounds, yen and more, with big amounts written out in millions and billions.",
+  },
+  {
+    icon: <Moon className="h-6 w-6 text-brand-blue" />,
+    title: "Light and Dark",
+    description: "Follows your system theme, or switch with one click. The floating window always matches.",
+  },
 ];
 
 const Features = () => {
@@ -52,7 +52,7 @@ const Features = () => {
           </div>
 
           <AnimatedText
-            text="Smart Functionality Designed for Effortless Use"
+            text="Everything You Need, Right on Top"
             element="h2"
             animation="fade-in-up"
             className="text-3xl md:text-4xl font-bold tracking-tight text-balance mb-4"
