@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui-custom/GlassCard";
 import AnimatedText from "@/components/ui-custom/AnimatedText";
 import { ArrowRight, Pin } from "lucide-react";
+import { supportsAlwaysOnTop } from "@/lib/env";
 
 
 /**
@@ -12,7 +13,13 @@ import { ArrowRight, Pin } from "lucide-react";
  * It displays the app's headline, description, call-to-action buttons,
  * and a preview of the calculator interface.
  */
-const Hero = () => {
+interface HeroProps {
+  /** Open the calculator in the always-on-top window */
+  onFloatEverywhere: () => void;
+}
+
+const Hero = ({ onFloatEverywhere }: HeroProps) => {
+  const canFloat = supportsAlwaysOnTop();
   /**
    * Smooth scrolls to the download section when "Add to Chrome" is clicked
    */
@@ -71,22 +78,22 @@ const Hero = () => {
 
           {/* Call-to-action buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-            {/* Primary CTA - Download button */}
+            {/* Primary: float it over everything (Chrome/Edge desktop), otherwise try it here */}
             <Button
               size="lg"
-              className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8"
-              onClick={scrollToDownload}
+              className="bg-brand-blue hover:bg-brand-blue/90 text-white rounded-full px-8 gap-2"
+              onClick={canFloat ? onFloatEverywhere : scrollToDemo}
             >
-              Add to Chrome
+              {canFloat ? (
+                <>
+                  <Pin className="h-4 w-4" /> Float it over everything
+                </>
+              ) : (
+                "Try it now"
+              )}
             </Button>
-            {/* Secondary CTA - Demo button with arrow icon */}
-            <Button
-              variant="outline"
-              size="lg"
-              className="rounded-full px-6 group"
-              onClick={scrollToDemo}
-            >
-              Try it now
+            <Button variant="outline" size="lg" className="rounded-full px-6 group" onClick={scrollToDownload}>
+              Install the app or extension
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>

@@ -2,7 +2,10 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/ui-custom/GlassCard";
 import AnimatedText from "@/components/ui-custom/AnimatedText";
-import { ArrowRight, Chrome, Github, Globe } from "lucide-react";
+import { ArrowRight, Chrome, Download, Github, MonitorSmartphone, Pin } from "lucide-react";
+import { toast } from "sonner";
+import { supportsAlwaysOnTop } from "@/lib/env";
+import { useInstall } from "@/lib/install";
 
 const REPO = "https://github.com/Vinitintodia/voice-calc-vision";
 const GUIDE = `${REPO}/blob/main/CHROME_EXTENSION_GUIDE.md`;
@@ -18,7 +21,18 @@ const Step = ({ n, children }: { n: number; children: React.ReactNode }) => (
   </li>
 );
 
-const DownloadSection = () => (
+interface DownloadSectionProps {
+  onFloatEverywhere: () => void;
+}
+
+const DownloadSection = ({ onFloatEverywhere }: DownloadSectionProps) => {
+  const { canInstall, installed, install } = useInstall();
+  const canFloat = supportsAlwaysOnTop();
+  const onInstall = async () => {
+    if (await install()) toast.success("Float Calci is installed. Open it from your dock, desktop or start menu.");
+  };
+
+  return (
   <section id="download" className="py-24 relative overflow-hidden">
     <div className="absolute top-40 left-[15%] w-64 h-64 rounded-full bg-brand-blue/10 filter blur-3xl"></div>
     <div className="absolute bottom-20 right-[10%] w-72 h-72 rounded-full bg-brand-purple-light/10 filter blur-3xl"></div>
@@ -37,7 +51,7 @@ const DownloadSection = () => (
           className="text-3xl md:text-4xl font-bold tracking-tight text-balance mb-4"
         />
         <AnimatedText
-          text="Add the Chrome extension to float it over any app, or use it right here in your browser. It's free and open source."
+          text="Float it over everything straight from this site, install it as an app, or add the Chrome extension to put it on any web page. Free and open source."
           element="p"
           animation="fade-in-up"
           delay={100}
@@ -47,6 +61,51 @@ const DownloadSection = () => (
 
       <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
         <GlassCard className="p-6 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+          <div className="flex flex-col h-full">
+            <div className="bg-emerald-500/10 p-4 rounded-lg inline-flex self-start mb-4">
+              <MonitorSmartphone className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <h3 className="text-xl font-semibold mb-3">Install the app</h3>
+            <p className="text-muted-foreground mb-4 text-sm">
+              No extension needed. Install Float Calci from this site and it opens in its own window from your dock,
+              desktop or start menu, even offline. Press <strong>Pin</strong> to float it over every tab and app.
+            </p>
+            <ul className="mb-6 flex-grow space-y-1.5 text-xs text-muted-foreground">
+              <li>
+                <strong className="text-foreground">Chrome / Edge:</strong> the button below, or the install icon in the address bar
+              </li>
+              <li>
+                <strong className="text-foreground">iPhone / iPad:</strong> Safari → Share → Add to Home Screen
+              </li>
+              <li>
+                <strong className="text-foreground">Android:</strong> Chrome menu → Install app
+              </li>
+            </ul>
+            <div className="mt-auto grid gap-2">
+              {installed ? (
+                <p className="rounded-md bg-emerald-500/10 px-3 py-2 text-center text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  Installed. Open it from your dock or start menu.
+                </p>
+              ) : canInstall ? (
+                <Button className="w-full gap-2 bg-emerald-600 text-white hover:bg-emerald-600/90" onClick={onInstall}>
+                  <Download className="h-4 w-4" /> Install Float Calci
+                </Button>
+              ) : null}
+              {canFloat ? (
+                <Button variant="outline" className="w-full gap-2" onClick={onFloatEverywhere}>
+                  <Pin className="h-4 w-4" /> Float it over everything now
+                </Button>
+              ) : (
+                <Button variant="outline" className="w-full group" onClick={scrollToDemo}>
+                  Try it now
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </GlassCard>
+
+        <GlassCard className="p-6 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
           <div className="flex flex-col h-full">
             <div className="bg-brand-blue/10 p-4 rounded-lg inline-flex self-start mb-4">
               <Chrome className="h-6 w-6 text-brand-blue" />
@@ -63,23 +122,6 @@ const DownloadSection = () => (
             </ol>
             <Button className="w-full bg-brand-blue hover:bg-brand-blue/90 text-white group" onClick={() => window.open(GUIDE, "_blank")}>
               Setup guide
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </div>
-        </GlassCard>
-
-        <GlassCard className="p-6 animate-fade-in-up" style={{ animationDelay: "300ms" }}>
-          <div className="flex flex-col h-full">
-            <div className="bg-emerald-500/10 p-4 rounded-lg inline-flex self-start mb-4">
-              <Globe className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <h3 className="text-xl font-semibold mb-3">Use it on the web</h3>
-            <p className="text-muted-foreground mb-6 flex-grow text-sm">
-              No install needed. Open any calculator from <strong>Try Calci</strong> in the menu and drag it anywhere on the
-              page. Press the green dot to float it over your other apps (Chrome or Edge on a computer).
-            </p>
-            <Button variant="outline" className="w-full group" onClick={scrollToDemo}>
-              Try it now
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
@@ -107,11 +149,12 @@ const DownloadSection = () => (
       </div>
 
       <p className="mt-12 text-center text-sm text-muted-foreground">
-        Floating over other apps needs Chrome or Edge 116+ on Windows, macOS, Linux or ChromeOS. Everything else works in any
-        modern browser.
+        Floating over other tabs and apps needs Chrome or Edge 116+ on a computer. Only the extension can put the
+        calculator inside other websites' pages. Everything else works in any modern browser.
       </p>
     </div>
   </section>
-);
+  );
+};
 
 export default DownloadSection;

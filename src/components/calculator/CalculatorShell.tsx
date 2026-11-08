@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
-import { supportsAlwaysOnTop } from "@/lib/env";
+import { getSurface, supportsAlwaysOnTop } from "@/lib/env";
 import { useThemeOn } from "@/lib/theme";
 import type { CalculatorType } from "@/lib/history";
 import { useCalculatorHost } from "./CalculatorHost";
@@ -385,6 +385,12 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
       setIsMinimized(false);
       setPipWindow(pip);
       host.onAlwaysOnTopChange?.(true);
+      if (getSurface() === "web") {
+        toast.success("Floating over all your tabs and apps", {
+          description: "Keep this tab open (it can be in the background). Close the little window to bring it back.",
+          duration: 6000,
+        });
+      }
     } catch (err) {
       console.error(err);
       toast.error("Couldn't open the floating window.");
@@ -403,6 +409,13 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
     window.addEventListener(PIN_EVENT, onPin);
     return () => window.removeEventListener(PIN_EVENT, onPin);
   }, []);
+
+  // "Float it over everything" on the website: open straight into the
+  // always-on-top window (still within the click's user activation).
+  const startOnTop = !!host.startAlwaysOnTop;
+  useEffect(() => {
+    if (startOnTop) void openRef.current();
+  }, [startOnTop]);
 
   const onGreen = () => {
     if (pipWindow) closeAlwaysOnTop();

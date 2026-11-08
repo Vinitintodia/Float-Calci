@@ -9,6 +9,7 @@ import CalculatorManager from "@/components/CalculatorManager";
 import HistoryPanel from "@/components/HistoryPanel";
 import { CalculatorHostContext, type CalculatorHost } from "@/components/calculator/CalculatorHost";
 import { useSaveOnClose } from "@/hooks/use-save-on-close";
+import { PIN_EVENT } from "@/components/calculator/CalculatorShell";
 import type { CalculatorType } from "@/lib/history";
 
 const Index = () => {
@@ -16,7 +17,23 @@ const Index = () => {
   const [calculatorType, setCalculatorType] = useState<CalculatorType>("basic");
   const [historyOpen, setHistoryOpen] = useState(false);
 
-  const { requestClose, dialog } = useSaveOnClose(() => setShowCalculator(false));
+  const [floatNow, setFloatNow] = useState(false);
+  const { requestClose, dialog } = useSaveOnClose(() => {
+    setShowCalculator(false);
+    setFloatNow(false);
+  });
+
+  // "Float it over everything": open the calculator straight into the
+  // always-on-top window, above every tab and app.
+  const floatEverywhere = () => {
+    if (showCalculator) {
+      window.dispatchEvent(new Event(PIN_EVENT));
+      return;
+    }
+    setCalculatorType("basic");
+    setFloatNow(true);
+    setShowCalculator(true);
+  };
 
   // Open a calculator, or close it if the same one is clicked again.
   const toggleCalculator = (type: CalculatorType) => {
@@ -28,7 +45,12 @@ const Index = () => {
     }
   };
 
-  const host: CalculatorHost = { docked: false, requestClose };
+  const host: CalculatorHost = {
+    docked: false,
+    requestClose,
+    startAlwaysOnTop: floatNow,
+    onAlwaysOnTopChange: (active) => active && setFloatNow(false),
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,10 +60,10 @@ const Index = () => {
         calculatorType={calculatorType}
         onOpenHistory={() => setHistoryOpen(true)}
       />
-      <Hero />
+      <Hero onFloatEverywhere={floatEverywhere} />
       <Features />
       <AppDemo />
-      <DownloadSection />
+      <DownloadSection onFloatEverywhere={floatEverywhere} />
       <Footer />
 
       {showCalculator && (

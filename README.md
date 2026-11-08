@@ -6,7 +6,8 @@
 
 ## ✨ Features
 
-- **Float on top of all apps**: the green window dot pins the calculator above Excel, PDFs, Zoom and everything else (Chrome / Edge 116+ on desktop)
+- **Float on top of all apps, straight from the website**: one click on **Float it over everything** keeps the calculator above every tab and app (Excel, PDFs, Zoom…) with no install (Chrome / Edge 116+ on a computer)
+- **Installable app**: install Float Calci from the site; it opens in its own window from your dock or start menu and works offline
 - **See-through while scrolling**: the floating calculator fades to glass while the page scrolls, so you can read what's underneath
 - **Magnetic edge tuck**: drag a calculator off the side of the page and it tucks in. After a 5-second pause, hover near the tab for 2 seconds (or click it) and it slides back out
 - **Financial calculator with exam-calculator keystrokes**: TVM (N, I/Y, PV, PMT, FV, CPT, 2ND), cash flows, NPV, IRR, payback, amortization, bonds, interest conversion and percent change
@@ -44,6 +45,16 @@ Open http://localhost:8080 and choose a calculator from **Try Calci**, or try th
 | `npm test` | Run the test suite (Vitest) |
 | `npm run lint` | Run ESLint |
 | `npm run preview` | Preview the production build |
+
+## 🌍 Use it everywhere, no extension needed
+
+From the website (e.g. `float-calci.vercel.app`):
+
+| You want | Do this |
+|---|---|
+| A calculator above every tab and app, right now | Click **Float it over everything** (keep the Float Calci tab open; it can be in the background) |
+| Float Calci as an app on your computer or phone | Click **Install app** (Chrome/Edge), or Safari → Share → **Add to Home Screen**. It opens in its own window, works offline, and **Pin** floats it over everything |
+| The calculator *inside* other websites' pages | Only the [Chrome extension](#-chrome-extension) can do this: browsers don't let a website draw on other sites |
 
 ## 🌐 Deploy the website (Vercel)
 

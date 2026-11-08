@@ -24,6 +24,8 @@ export interface CalculatorHost {
   compact?: boolean;
   /** Hide the window title bar (the page overlay draws its own draggable bar). */
   hideTitleBar?: boolean;
+  /** Open straight into the always-on-top window (must follow a click). */
+  startAlwaysOnTop?: boolean;
 }
 
 const defaultHost: CalculatorHost = {

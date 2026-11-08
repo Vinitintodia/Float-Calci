@@ -44,6 +44,10 @@ by name. On a shared computer:
 * Extension files use `use_dynamic_url`, so websites can't detect that Float Calci is installed.
 * Strict extension CSP (`script-src 'self'`): no remote scripts or fonts.
 
+**Installed app / offline support**
+* The service worker (`public/sw.js`) caches only Float Calci's own files so it opens offline. It never
+  intercepts requests to other sites, and stores no calculations (those stay in `localStorage`).
+
 **Website (when deployed with `vercel.json`)**
 * Content Security Policy: only the site's own scripts plus Google sign-in may run; no plugins; forms can't post
   elsewhere.

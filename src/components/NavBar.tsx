@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { BarChart3, Calculator, ChevronDown, FlaskConical, History, Menu } from "lucide-react";
+import { BarChart3, Calculator, ChevronDown, Download, FlaskConical, History, Menu } from "lucide-react";
+import { toast } from "sonner";
+import { useInstall } from "@/lib/install";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -30,6 +32,10 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onOpenHist
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { unsavedCount } = useHistory();
+  const { canInstall, installed, install } = useInstall();
+  const onInstall = async () => {
+    if (await install()) toast.success("Float Calci is installed. Open it from your dock, desktop or start menu.");
+  };
 
   // Close the dropdown when clicking outside
   useEffect(() => {
@@ -117,6 +123,11 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onOpenHist
               )}
             </div>
 
+            {canInstall && !installed && (
+              <Button size="sm" variant="outline" className="rounded-full gap-1.5" onClick={onInstall} title="Install Float Calci as an app">
+                <Download className="h-4 w-4" /> Install app
+              </Button>
+            )}
             {historyButton}
             <ThemeToggle />
           </nav>
@@ -161,6 +172,18 @@ const NavBar = ({ onFloCalClick, isCalculatorVisible, calculatorType, onOpenHist
               </button>
             ))}
           </div>
+
+          {canInstall && !installed && (
+            <button
+              onClick={() => {
+                setMobileOpen(false);
+                void onInstall();
+              }}
+              className="mt-4 flex w-full items-center gap-3 rounded-lg bg-brand-blue px-4 py-3 text-sm font-medium text-white"
+            >
+              <Download className="h-4 w-4" /> Install the app
+            </button>
+          )}
 
           <p className="mt-6 mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Go to</p>
           <nav className="grid">

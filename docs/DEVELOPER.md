@@ -34,6 +34,7 @@ The same React calculators render in several places. `src/lib/env.ts` (`getSurfa
 |---|---|---|---|
 | Website, floating | `src/pages/Index.tsx` | Draggable over the page | Edge tuck, see-through while scrolling, save prompt on close |
 | Website, live demo | `src/components/AppDemo.tsx` | Docked in the page | `autoKeyboard: false`: only takes keys after a click |
+| Installed web app / `/?app` | `src/main.tsx` → `CalculatorApp` | Just the calculator, in its own OS window | PWA (`manifest.webmanifest` + `sw.js`); resizes itself to fit; **Pin** = always on top |
 | Extension, on the page | `src/extension/overlay.ts` → iframe `popup.html?mode=overlay` | Window drawn over any website | Drag bar, dots, tuck and scroll fade live in `overlay.ts` |
 | Extension, desktop window | `popup.html?mode=window` | `chrome.windows.create({type: "popup"})` | Auto-fits height; **Pin** opens the always-on-top window |
 | Extension, toolbar popup | `popup.html?notice=…` | Only on pages Chrome blocks (`chrome://`, new tab, Web Store) | Shows a note explaining why |
@@ -55,6 +56,7 @@ The page that shows a calculator configures it through `CalculatorHostContext` (
 | `compact` | Tighter layout (toolbar popup, on-page overlay) |
 | `hideTitleBar` | No title bar (the overlay and desktop window have their own controls) |
 | `onAlwaysOnTopChange` | Called when the PiP window opens/closes (the desktop window minimises itself) |
+| `startAlwaysOnTop` | Open straight into the always-on-top window (the website's **Float it over everything**; must follow a click) |
 
 **Keyboard routing:** only one calculator takes keys: the one last clicked, or the newest floating one
 (`activeShell` in `CalculatorShell.tsx`).
@@ -73,6 +75,7 @@ src/
 │   ├── FloatingCalculator.tsx          Basic
 │   ├── ScientificCalculator.tsx        Scientific (uses lib/evaluate)
 │   ├── FinancialCalculator.tsx         Financial keypad + LCD + currency picker (uses lib/finCalc)
+│   ├── CalculatorApp.tsx               app screen (tabs + calculator) for the extension and the installed app
 │   ├── HistoryPanel.tsx                history, profile, delete
 │   ├── SaveCalculationsDialog.tsx      name / Google sign-in prompt
 │   └── ui/                             shadcn/ui components (generated)
@@ -86,13 +89,16 @@ src/
 │   ├── storage.ts      chrome.storage.local in the extension, localStorage on the web
 │   ├── theme.ts        light / dark / system
 │   ├── googleAuth.ts   Google sign-in (GIS on the web, chrome.identity in the extension)
+│   ├── install.ts      "Install app" prompt + service-worker registration
 │   └── env.ts          which surface we're on; Document PiP support
 ├── extension/
 │   ├── background.ts   service worker: icon click → overlay or popup; desktop window
 │   └── overlay.ts      on-page window (no imports: injected as one classic script)
 ├── pages/Index.tsx     the website
 └── popup.tsx           extension page (overlay iframe / desktop window / popup)
-public/manifest.json    Manifest V3 (copied to dist/)
+public/manifest.json    Chrome extension manifest (Manifest V3)
+public/manifest.webmanifest  web app manifest (install as an app)
+public/sw.js            service worker: offline support for the website / installed app
 vercel.json             Vercel build + security headers
 ```
 
@@ -166,6 +172,19 @@ parent window.
 `storage`, `identity`, `activeTab`, `scripting`. No host permissions. `web_accessible_resources` use
 `use_dynamic_url: true` so websites can't detect the extension by probing its files.
 
+## 6b. The installable web app (PWA)
+
+* `public/manifest.webmanifest` describes the app (start URL `/?app`, icons, shortcuts for each calculator).
+  Don't confuse it with `public/manifest.json`, which is the **extension** manifest.
+* `public/sw.js` caches only the site's own files: pages network-first (fresh, cached copy offline), assets
+  stale-while-revalidate. It never touches other origins (Google sign-in goes straight to the network). Bump
+  `CACHE` (`floatcalci-v2`…) if you change the caching strategy.
+* `src/lib/install.ts` keeps the browser's `beforeinstallprompt` event so the site's **Install app** buttons can
+  open the install dialog; it also registers the service worker (production only, never in the extension).
+* `getSurface()` returns `"app"` when running installed (`display-mode: standalone`) or with `?app` in the URL;
+  `main.tsx` then renders `CalculatorApp` instead of the landing page.
+* Check installability in Chrome DevTools → Application → Manifest (or CDP `Page.getInstallabilityErrors`).
+
 ## 7. Testing
 
 **Unit tests:** `npm test` (77 tests). Add a test for any maths or keystroke change.
@@ -179,6 +198,9 @@ parent window.
 - [ ] Extension: reload in `chrome://extensions`; click the icon on a normal site (drag, red/yellow/green dots)
 - [ ] Click the icon on `chrome://extensions`: popup with the notice
 - [ ] Desktop window (`Alt+Shift+F`): one set of window controls, height fits, **Pin** floats over other apps
+- [ ] **Float it over everything** on the website opens the always-on-top window
+- [ ] Production build (`npm run build && npm run preview`): DevTools shows the site as installable; reload offline works
+- [ ] `/?app` shows just the calculator
 - [ ] Dark mode everywhere
 
 **Automating the extension:** Playwright can't click the toolbar icon, so give a *test copy* of `dist/` the
