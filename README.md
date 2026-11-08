@@ -7,6 +7,7 @@
 ## ✨ Features
 
 - **Float on top of all apps**: the green window dot pins the calculator above Excel, PDFs, Zoom and everything else (Chrome / Edge 116+ on desktop)
+- **See-through while scrolling**: the floating calculator fades to glass while the page scrolls, so you can read what's underneath
 - **Magnetic edge tuck**: drag a calculator off the side of the page and it tucks in. After a 5-second pause, hover near the tab for 2 seconds (or click it) and it slides back out
 - **Financial calculator with exam-calculator keystrokes**: TVM (N, I/Y, PV, PMT, FV, CPT, 2ND), cash flows, NPV, IRR, payback, amortization, bonds, interest conversion and percent change
 - **11 currencies**: ₹, $, €, £, ¥, AED, S$, A$, C$, CHF, CN¥ (or none), with big amounts written out in millions and billions
@@ -43,6 +44,16 @@ Open http://localhost:8080 and choose a calculator from **Try Calci**, or try th
 | `npm test` | Run the test suite (Vitest) |
 | `npm run lint` | Run ESLint |
 | `npm run preview` | Preview the production build |
+
+## 🌐 Deploy the website (Vercel)
+
+The site is a static Vite build, so it runs free on Vercel's Hobby plan. `vercel.json` already has the settings.
+
+1. Sign in at [vercel.com](https://vercel.com) with GitHub.
+2. **Add New → Project**, pick this repository, and click **Deploy** (the defaults from `vercel.json` are right).
+3. You get a URL like `https://float-calci.vercel.app`. Every push to `main` redeploys it automatically.
+
+If you use Google sign-in, add `VITE_GOOGLE_CLIENT_ID` under **Project → Settings → Environment Variables**, and add the Vercel URL to **Authorized JavaScript origins** in Google Cloud Console.
 
 ## 🧩 Chrome Extension
 

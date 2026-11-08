@@ -35,6 +35,9 @@ const LEAVE = 40;
 // with your work); after that, hover near the tab for 2 s to bring it out.
 // Clicking / tapping the tab always brings it out straight away.
 const COOLDOWN = 5000;
+// See-through while the page scrolls
+const SCROLL_OPACITY = 0.3;
+const SCROLL_IDLE = 450;
 const DWELL = 2000;
 
 // Which calculator gets keyboard input (see the keyboard effect below).
@@ -110,6 +113,7 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
   const [pipWindow, setPipWindow] = useState<Window | null>(null);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [scrolling, setScrolling] = useState(false); // page is scrolling -> see-through
   // Fit small screens (phones): never wider than the viewport, start fully visible.
   const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
   width = Math.min(width, vw - 16);
@@ -342,6 +346,23 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
     }
   };
 
+  // ---- See-through while the page scrolls -----------------------------------
+  // So you can read what's underneath; solid again shortly after scrolling stops.
+  useEffect(() => {
+    if (docked) return;
+    let timer: number | undefined;
+    const onScroll = () => {
+      setScrolling(true);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => setScrolling(false), SCROLL_IDLE);
+    };
+    window.addEventListener("scroll", onScroll, { capture: true, passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll, { capture: true });
+      window.clearTimeout(timer);
+    };
+  }, [docked]);
+
   // ---- Always on top -------------------------------------------------------
   const closeAlwaysOnTop = useCallback(() => pipWindow?.close(), [pipWindow]);
 
@@ -420,10 +441,10 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
         userSelect: "none",
         backdropFilter: "blur(8px)",
         WebkitBackdropFilter: "blur(8px)",
-        opacity: faded ? 0.82 : 1,
+        opacity: scrolling && !isHovered && !docked && !dragging ? SCROLL_OPACITY : faded ? 0.82 : 1,
         transition: dragging
-          ? "opacity 0.3s ease, background-color 0.3s ease"
-          : "opacity 0.3s ease, background-color 0.3s ease, left 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15), top 0.2s ease",
+          ? "opacity 0.2s ease, background-color 0.3s ease"
+          : "opacity 0.2s ease, background-color 0.3s ease, left 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.15), top 0.2s ease",
         overflow: "hidden",
       }}
       onMouseEnter={() => setIsHovered(true)}

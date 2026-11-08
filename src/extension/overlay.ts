@@ -48,6 +48,7 @@ interface FloatCalciOverlay {
       .win.dark { --bg: #0f121a; --bar: #1f2533; --text: #a3acbd; --line: #313a4d; --tab: #2f8fe8; }
       .win.dragging { transition: opacity .2s ease; }
       .win.hidden { opacity: 0; transform: scale(.96); pointer-events: none; }
+      .win.scrolling:not(.hover):not(.dragging) { opacity: .3; }
       .bar {
         height: ${BAR}px; display: flex; align-items: center; gap: 8px; padding: 0 12px;
         background: var(--bar); border-bottom: 1px solid var(--line); cursor: grab; user-select: none; touch-action: none;
@@ -299,6 +300,22 @@ interface FloatCalciOverlay {
     },
     true,
   );
+
+  // See-through while the page scrolls (so you can read what's underneath),
+  // solid again shortly after scrolling stops or when the cursor is on it
+  let scrollTimer: number | undefined;
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!visible) return;
+      win.classList.add("scrolling");
+      clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => win.classList.remove("scrolling"), 450);
+    },
+    { capture: true, passive: true },
+  );
+  win.addEventListener("pointerenter", () => win.classList.add("hover"));
+  win.addEventListener("pointerleave", () => win.classList.remove("hover"));
 
   // Never lost: stay on screen when the window is resized
   window.addEventListener("resize", () => {
