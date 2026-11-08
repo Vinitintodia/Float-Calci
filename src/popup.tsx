@@ -1,9 +1,11 @@
-// Chrome extension UI. The same page is used in two places:
-//   popup.html              -> the toolbar popup
+// Chrome extension UI. The same page is used in three places:
+//   popup.html?mode=overlay -> the calculator floating over a web page
+//                              (inside the iframe drawn by extension/overlay.ts)
 //   popup.html?mode=window  -> a small separate window that can be pinned
 //                              "on top of all apps" (Document Picture-in-Picture)
+//   popup.html              -> opened directly (older toolbar popup)
 import { createRoot } from "react-dom/client";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { History, Pin } from "lucide-react";
 import "./index.css";
 import CalculatorManager from "./components/CalculatorManager";
@@ -15,10 +17,25 @@ import { PIN_EVENT } from "./components/calculator/CalculatorShell";
 import { useSaveOnClose } from "./hooks/use-save-on-close";
 import { getSurface, isExtension, supportsAlwaysOnTop } from "./lib/env";
 import { useHistory, type CalculatorType } from "./lib/history";
+import { useTheme } from "./lib/theme";
 import { cn } from "./lib/utils";
 
 const surface = getSurface();
-const initialType = (new URLSearchParams(location.search).get("calc") as CalculatorType) || "basic";
+const LAST_CALC_KEY = "floatcalci:lastCalc";
+const readLastCalc = (): CalculatorType | null => {
+  try {
+    const v = localStorage.getItem(LAST_CALC_KEY);
+    return v === "basic" || v === "scientific" || v === "financial" ? v : null;
+  } catch {
+    return null;
+  }
+};
+const initialType = (new URLSearchParams(location.search).get("calc") as CalculatorType) || readLastCalc() || "basic";
+
+/** Talk to the page overlay that hosts this iframe (extension/overlay.ts). */
+const toOverlay = (msg: Record<string, unknown>) => {
+  if (surface === "overlay" && window.parent !== window) window.parent.postMessage(msg, "*");
+};
 
 const TABS: { type: CalculatorType; label: string }[] = [
   { type: "basic", label: "Basic" },
@@ -47,10 +64,55 @@ const ExtensionApp = () => {
   const [type, setType] = useState<CalculatorType>(initialType);
   const [historyOpen, setHistoryOpen] = useState(false);
   const { unsavedCount } = useHistory();
-  const { requestClose, dialog } = useSaveOnClose(() => window.close());
+  const { requestClose, dialog, isOpen: saveOpen } = useSaveOnClose(() =>
+    surface === "overlay" ? toOverlay({ type: "floatcalci:close" }) : window.close(),
+  );
+  const { resolved: theme } = useTheme();
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  // Remember the last calculator, and tell the page overlay about it
+  useEffect(() => {
+    try {
+      localStorage.setItem(LAST_CALC_KEY, type);
+    } catch {
+      /* ignore */
+    }
+    toOverlay({ type: "floatcalci:calc", calc: type });
+  }, [type]);
+
+  useEffect(() => toOverlay({ type: "floatcalci:theme", dark: theme === "dark" }), [theme]);
+
+  // Overlay: report our height so the window fits (taller while the save prompt
+  // or history panel is open, so they don't have to scroll), and close when asked
+  const needsRoom = saveOpen || historyOpen;
+  const reportHeight = useRef(() => {});
+  reportHeight.current = () => {
+    const h = rootRef.current?.offsetHeight ?? 0;
+    toOverlay({ type: "floatcalci:height", height: Math.max(h, needsRoom ? 600 : 0) });
+  };
+  useEffect(() => reportHeight.current(), [needsRoom]);
+  const latestClose = useRef(() => requestClose(type));
+  latestClose.current = () => requestClose(type);
+  useEffect(() => {
+    if (surface !== "overlay") return;
+    toOverlay({ type: "floatcalci:ready" });
+    const el = rootRef.current;
+    const ro = el ? new ResizeObserver(() => reportHeight.current()) : null;
+    if (el && ro) ro.observe(el);
+    const onMessage = (e: MessageEvent) => {
+      if (e.source === window.parent && e.data?.type === "floatcalci:request-close") latestClose.current();
+    };
+    window.addEventListener("message", onMessage);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("message", onMessage);
+    };
+  }, []);
 
   const host: CalculatorHost =
-    surface === "popup"
+    surface === "overlay"
+      ? { docked: true, compact: true, hideTitleBar: true, requestClose }
+      : surface === "popup"
       ? {
           docked: true,
           compact: true,
@@ -64,7 +126,8 @@ const ExtensionApp = () => {
 
   return (
     <div
-      className={cn("text-foreground", surface === "popup" ? "w-[380px]" : "min-h-screen w-full")}
+      ref={rootRef}
+      className={cn("text-foreground", surface === "popup" ? "w-[380px]" : surface === "overlay" ? "w-full" : "min-h-screen w-full")}
       style={{ background: "var(--calc-window-bg)" }}
     >
       <header className="flex items-center gap-1.5 px-2.5 pb-2 pt-2.5">

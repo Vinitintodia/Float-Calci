@@ -24,5 +24,5 @@ export const useSaveOnClose = (close: (type: CalculatorType) => void) => {
     />
   );
 
-  return { requestClose, dialog };
+  return { requestClose, dialog, isOpen: pending !== null };
 };

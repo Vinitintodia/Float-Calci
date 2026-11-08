@@ -4,9 +4,25 @@ Float Calci runs in three places, all from the same code:
 
 | Where | How you open it | What it's for |
 |---|---|---|
-| **Toolbar popup** | Click the extension icon, or `Alt+Shift+C` | Quick sums |
-| **Floating window** | Pin button in the popup header, or `Alt+Shift+F` | A small calculator window of its own |
+| **On the page** | Click the extension icon, or `Alt+Shift+C` | A calculator floating over the website you're on: drag it, minimise it, tuck it into the edge, close it |
+| **Floating window** | Green dot on the on-page calculator, or `Alt+Shift+F` | A small calculator window of its own |
 | **On top of all apps** | **Pin** in the floating window (or its green dot) | Stays above every app on your laptop: Excel, PDFs, Zoom… |
+
+### The on-page calculator
+
+* **Move it:** drag the bar at the top.
+* **Close it:** the red dot, or click the icon again. If you have unsaved calculations it asks once whether to save them.
+* **Minimise it:** the yellow dot.
+* **Tuck it away:** drag it past the left or right edge of the page; a small tab stays visible. For 5 seconds after it
+  tucks away the cursor can't pull it back (so you can get on with your work). After that, hover near the tab for
+  2 seconds (the tab fills up) and it slides out; move away and it tucks back. Clicking the tab brings it out instantly.
+* It opens where you left it, and stays on screen if you resize the window.
+* Chrome doesn't let extensions draw on its own pages (`chrome://` pages, the Chrome Web Store, the new tab page).
+  There, clicking the icon opens the floating window instead.
+
+The calculator runs inside an isolated frame, so websites can't change how it looks and it can't read the page.
+It only appears on a tab when you click the icon (the `activeTab` permission), so the extension never runs on
+pages you haven't asked it to.
 
 ## How "float over the whole laptop" works
 
@@ -15,9 +31,9 @@ Chrome's **Document Picture-in-Picture** API (Chrome / Edge 116+ on Windows, mac
 It works like video picture-in-picture, but for any web page: Chrome opens a small window that is always
 on top, and React renders the same calculator into it with a portal, so nothing you typed is lost.
 
-Why it needs the separate floating window first: the toolbar popup closes as soon as it loses focus, and
-the always-on-top window closes with the page that opened it. So the popup opens the floating window
-(via the background service worker), and the floating window opens the always-on-top one. While
+Why it needs the separate floating window first: the always-on-top window closes with the page that opened
+it, so the on-page calculator opens the floating window (via the background service worker), and the floating
+window opens the always-on-top one. While
 it is pinned, the floating window minimises itself out of the way. Close the pinned window and it comes back.
 
 On the website, the green dot on any calculator opens the always-on-top window directly.
@@ -80,15 +96,16 @@ your name, email and photo.
 
 ## Permissions
 
-* **storage**: saves calculation history and your profile on this device.
+* **storage**: saves calculation history, your profile and calculator values on this device.
 * **identity**: the Google sign-in window.
+* **activeTab + scripting**: show the calculator on the tab you clicked the icon on (only that tab, only when you click).
 
 Nothing is sent anywhere except Google's sign-in, and only if you choose it.
 
-## Financial calculator in the popup
+## Financial calculator on the page
 
-The toolbar popup is limited to 600px tall, so the financial calculator uses a compact layout there (the
-hints become a tooltip on the display). The floating window and the website show the full layout.
+The on-page calculator uses a compact layout (the hints become a tooltip on the display). The floating window
+and the website show the full layout.
 Your TVM values, cash flows and memories are kept between sessions in `chrome.storage.local`.
 
 ## Why the calculators no longer use `eval`

@@ -29,8 +29,13 @@ const isTouchScreen = () => typeof window !== "undefined" && window.matchMedia("
 
 // Edge tuck: width of the tab left on screen, and how close the cursor must come.
 const TAB = 28;
-const MAGNET = 70;
+const MAGNET = 60;
 const LEAVE = 40;
+// After it tucks away, the cursor can't pull it out for 5 s (so you can get on
+// with your work); after that, hover near the tab for 2 s to bring it out.
+// Clicking / tapping the tab always brings it out straight away.
+const COOLDOWN = 5000;
+const DWELL = 2000;
 
 // Which calculator gets keyboard input (see the keyboard effect below).
 let nextShellId = 1;
@@ -165,6 +170,21 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
   const [peek, setPeek] = useState(false);
   const [dragging, setDragging] = useState(false);
   const unpeekTimer = useRef<number | undefined>(undefined);
+  const dwellTimer = useRef<number | undefined>(undefined);
+  const cooldownUntil = useRef(0);
+  const [charging, setCharging] = useState(false); // tab filling up while you hover
+
+  const cancelDwell = useCallback(() => {
+    if (dwellTimer.current !== undefined) window.clearTimeout(dwellTimer.current);
+    dwellTimer.current = undefined;
+    setCharging(false);
+  }, []);
+  /** Slide (back) into the edge and start the 5 s cool-down. */
+  const tuckAway = useCallback(() => {
+    cancelDwell();
+    setPeek(false);
+    cooldownUntil.current = Date.now() + COOLDOWN;
+  }, [cancelDwell]);
 
   /** Keep the calculator fully on screen (vertically always; horizontally unless tucked). */
   const clampToView = useCallback(
@@ -232,9 +252,18 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
       const nearY = e.clientY > r.top - MAGNET && e.clientY < r.bottom + MAGNET;
       if (!p) {
         const nearX = t === "left" ? e.clientX < TAB + MAGNET : e.clientX > window.innerWidth - TAB - MAGNET;
-        if (nearX && nearY) {
-          window.clearTimeout(unpeekTimer.current);
-          setPeek(true);
+        const near = nearX && nearY && Date.now() >= cooldownUntil.current;
+        if (near && dwellTimer.current === undefined) {
+          // Start filling the tab; slide out if the cursor stays for DWELL ms
+          setCharging(true);
+          dwellTimer.current = window.setTimeout(() => {
+            dwellTimer.current = undefined;
+            setCharging(false);
+            window.clearTimeout(unpeekTimer.current);
+            setPeek(true);
+          }, DWELL);
+        } else if (!near && dwellTimer.current !== undefined) {
+          cancelDwell();
         }
       } else {
         const inside =
@@ -243,8 +272,8 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
         else if (unpeekTimer.current === undefined || unpeekTimer.current === -1) {
           unpeekTimer.current = window.setTimeout(() => {
             unpeekTimer.current = -1;
-            setPeek(false);
-          }, 500);
+            tuckAway();
+          }, 600);
         }
       }
     };
@@ -257,10 +286,10 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
       const o = offsetRef.current;
       if (o.x < -w * 0.35) {
         setTuck("left");
-        setPeek(false);
+        tuckAway();
       } else if (o.x + w > window.innerWidth + w * 0.35) {
         setTuck("right");
-        setPeek(false);
+        tuckAway();
       } else {
         setTuck(null);
         setOffset(clampToView(o)); // snap back fully on screen
@@ -270,19 +299,25 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
     // Touch: tap outside a peeking calculator to tuck it away again
     const down = (e: PointerEvent) => {
       const { tuck: t, peek: p } = live.current;
-      if (t && p && calcRef.current && !calcRef.current.contains(e.target as Node)) setPeek(false);
+      // composedPath(): the tab you tapped may already be gone from the page by now
+      if (t && p && calcRef.current && !e.composedPath().includes(calcRef.current)) tuckAway();
     };
+    // Cursor left the browser window: stop filling the tab
+    const leave = () => cancelDwell();
 
     document.addEventListener("pointermove", move);
     document.addEventListener("pointerup", up);
     document.addEventListener("pointerdown", down);
+    document.documentElement.addEventListener("pointerleave", leave);
     return () => {
       document.removeEventListener("pointermove", move);
       document.removeEventListener("pointerup", up);
       document.removeEventListener("pointerdown", down);
+      document.documentElement.removeEventListener("pointerleave", leave);
       window.clearTimeout(unpeekTimer.current);
+      window.clearTimeout(dwellTimer.current);
     };
-  }, [docked, clampToView, width]);
+  }, [docked, clampToView, width, tuckAway, cancelDwell]);
 
   const startDrag = (e: React.PointerEvent) => {
     if (docked) return;
@@ -291,6 +326,7 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
     if (tuck) {
       setTuck(null);
       setPeek(false);
+      cancelDwell();
       setOffset(from);
     }
     setDragging(true);
@@ -300,7 +336,10 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
   /** Tapping a tucked calculator slides it out (touch has no hover). */
   const onPanelPointerDown = () => {
     activeShell = shellId;
-    if (tuck && !peek) setPeek(true);
+    if (tuck && !peek) {
+      cancelDwell();
+      setPeek(true);
+    }
   };
 
   // ---- Always on top -------------------------------------------------------
@@ -394,7 +433,7 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
       {tucked && (
         <div
           data-testid="tuck-tab"
-          title="Bring the calculator back"
+          title="Click, or hover here for 2 seconds, to bring the calculator back"
           style={{
             position: "absolute",
             top: 0,
@@ -412,11 +451,25 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
             cursor: "pointer",
           }}
         >
-          {tuck === "left" ? "›" : "‹"}
+          {/* Fills up while the cursor hovers near the tab */}
+          <span
+            aria-hidden
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              height: charging ? "100%" : "0%",
+              background: "rgba(255,255,255,0.4)",
+              transition: charging ? `height ${DWELL}ms linear` : "height 150ms ease",
+            }}
+          />
+          <span style={{ position: "relative" }}>{tuck === "left" ? "›" : "‹"}</span>
         </div>
       )}
 
       {/* Title bar */}
+      {!host.hideTitleBar && (
       <div
         style={{
           padding: host.compact ? "0.45rem 0.75rem" : "0.75rem 1rem",
@@ -457,6 +510,7 @@ const CalculatorShell: React.FC<CalculatorShellProps> = ({
 
         <div style={{ width: 60 }} />
       </div>
+      )}
 
       {!isMinimized && children}
     </div>

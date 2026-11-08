@@ -7,10 +7,10 @@
 ## ✨ Features
 
 - **Float on top of all apps**: the green window dot pins the calculator above Excel, PDFs, Zoom and everything else (Chrome / Edge 116+ on desktop)
-- **Magnetic edge tuck**: drag a calculator off the side of the page and it tucks in; bring your cursor near and it slides back out
+- **Magnetic edge tuck**: drag a calculator off the side of the page and it tucks in. After a 5-second pause, hover near the tab for 2 seconds (or click it) and it slides back out
 - **Financial calculator with exam-calculator keystrokes**: TVM (N, I/Y, PV, PMT, FV, CPT, 2ND), cash flows, NPV, IRR, payback, amortization, bonds, interest conversion and percent change
 - **11 currencies**: ₹, $, €, £, ¥, AED, S$, A$, C$, CHF, CN¥ (or none), with big amounts written out in millions and billions
-- **Chrome extension**: toolbar popup, a floating window, and keyboard shortcuts
+- **Chrome extension**: click the icon and a calculator floats over the page you're on (drag, minimise, close, tuck), plus a floating window and keyboard shortcuts
 - **Dark theme**: follows your system setting by default and remembers your choice
 - **Calculation history**: every result is saved; closing a calculator asks for your name or *Continue with Google* to keep them
 - **Works on phones**: a menu to open any calculator, sized to fit the screen
@@ -21,7 +21,7 @@
 |---|---|---|
 | ![Financial calculator](docs/screenshots/financial.jpg) | ![Dark mode](docs/screenshots/dark-mode.jpg) | ![Mobile](docs/screenshots/mobile.jpg) |
 
-**Edge tuck**: tucked into the side (left), then sliding out as the cursor comes near (right)
+**Edge tuck**: tucked into the side (left), then slid out after hovering near the tab (right)
 
 ![Edge tuck](docs/screenshots/edge-tuck.jpg)
 
@@ -52,11 +52,14 @@ Open http://localhost:8080 and choose a calculator from **Try Calci**, or try th
 
 | Action | How |
 |---|---|
-| Open the popup | Toolbar icon or `Alt+Shift+C` |
-| Open the floating window | Pin button in the popup or `Alt+Shift+F` |
+| Show / hide the calculator on the page | Toolbar icon or `Alt+Shift+C` |
+| Move it | Drag the bar at the top |
+| Close / minimise | Red / yellow dot |
+| Tuck it into the edge | Drag it past the side of the page |
+| Open the floating window | Green dot, or `Alt+Shift+F` |
 | Keep it above all apps | **Pin** (or the green dot) in the floating window |
 
-![Extension popup](docs/screenshots/extension.jpg)
+![Float Calci on a web page](docs/screenshots/extension.jpg)
 
 Full guide (how floating over other apps works, Google sign-in, permissions, publishing): [CHROME_EXTENSION_GUIDE.md](CHROME_EXTENSION_GUIDE.md)
 
@@ -172,9 +175,11 @@ src/
 │   ├── theme.ts                  # light / dark / system
 │   ├── googleAuth.ts             # Google sign-in (web + extension)
 │   └── *.test.ts                 # tests
-├── extension/background.ts       # extension service worker
+├── extension/
+│   ├── background.ts             # extension service worker (icon click, floating window)
+│   └── overlay.ts                # the calculator drawn over a web page
 ├── pages/Index.tsx               # website
-└── popup.tsx                     # extension popup + floating window
+└── popup.tsx                     # extension calculator (on-page frame + floating window)
 public/manifest.json              # Manifest V3
 ```
 

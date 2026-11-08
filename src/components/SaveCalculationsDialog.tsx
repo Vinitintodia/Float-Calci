@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { isGoogleConfigured, signInWithGoogle } from "@/lib/googleAuth";
-import { profileFromName, saveToProfile, useHistory, type Profile } from "@/lib/history";
+import { dismissSavePrompt, profileFromName, saveToProfile, useHistory, type Profile } from "@/lib/history";
 
 interface SaveCalculationsDialogProps {
   open: boolean;
@@ -62,11 +62,15 @@ const SaveCalculationsDialog: React.FC<SaveCalculationsDialogProps> = ({ open, o
   };
 
   const recent = entries.filter((e) => e.profileId === null).slice(0, 3);
+  const notNow = () => {
+    dismissSavePrompt();
+    onFinished(false);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onFinished(false)}>
-      <DialogContent className="max-w-[min(92vw,26rem)] rounded-2xl">
-        <DialogHeader>
+    <Dialog open={open} onOpenChange={(o) => !o && notNow()}>
+      <DialogContent className="max-w-[26rem] gap-3 rounded-2xl p-5 sm:p-6">
+        <DialogHeader className="pr-6 text-left">
           <DialogTitle>Save your calculations?</DialogTitle>
           <DialogDescription>
             {reason === "close" ? "Before you go: you" : "You"} have {unsavedCount} unsaved calculation
@@ -75,10 +79,11 @@ const SaveCalculationsDialog: React.FC<SaveCalculationsDialogProps> = ({ open, o
         </DialogHeader>
 
         {recent.length > 0 && (
-          <ul className="space-y-1 rounded-lg bg-muted/60 p-3 font-mono text-xs text-muted-foreground">
+          <ul className="min-w-0 space-y-1.5 rounded-lg bg-muted/60 p-3 font-mono text-xs text-muted-foreground">
             {recent.map((e) => (
-              <li key={e.id} className="truncate">
-                {e.expression} = <span className="font-semibold text-foreground">{e.result}</span>
+              <li key={e.id} className="min-w-0" title={`${e.expression} = ${e.result}`}>
+                <span className="line-clamp-2 [overflow-wrap:anywhere]">{e.expression}</span>
+                <span className="block truncate font-semibold text-foreground">= {e.result}</span>
               </li>
             ))}
             {unsavedCount > recent.length && <li>…and {unsavedCount - recent.length} more</li>}
@@ -87,7 +92,7 @@ const SaveCalculationsDialog: React.FC<SaveCalculationsDialogProps> = ({ open, o
 
         <Button
           variant="outline"
-          className="w-full gap-2"
+          className="h-auto min-h-10 w-full gap-2 whitespace-normal"
           onClick={onGoogle}
           disabled={busy || !googleReady}
           title={googleReady ? undefined : "Add VITE_GOOGLE_CLIENT_ID to .env to enable Google sign-in"}
@@ -105,8 +110,9 @@ const SaveCalculationsDialog: React.FC<SaveCalculationsDialogProps> = ({ open, o
           <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
         </div>
 
-        <form onSubmit={onSaveName} className="flex gap-2">
+        <form onSubmit={onSaveName} className="flex min-w-0 gap-2">
           <Input
+            className="min-w-0"
             autoFocus
             placeholder="Your name"
             value={name}
@@ -120,7 +126,7 @@ const SaveCalculationsDialog: React.FC<SaveCalculationsDialogProps> = ({ open, o
         </form>
 
         <DialogFooter className="sm:justify-center">
-          <Button variant="ghost" size="sm" onClick={() => onFinished(false)} className="text-muted-foreground">
+          <Button variant="ghost" size="sm" onClick={notNow} className="h-auto whitespace-normal text-muted-foreground">
             Not now (keep them on this device only)
           </Button>
         </DialogFooter>

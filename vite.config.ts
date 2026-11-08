@@ -21,6 +21,8 @@ export default defineConfig(() => ({
         index: path.resolve(__dirname, 'index.html'),
         // Chrome extension service worker -> dist/assets/background.js
         background: path.resolve(__dirname, 'src/extension/background.ts'),
+        // Injected into web pages when you click the icon -> dist/assets/overlay.js
+        overlay: path.resolve(__dirname, 'src/extension/overlay.ts'),
       },
       output: {
         entryFileNames: 'assets/[name].js',

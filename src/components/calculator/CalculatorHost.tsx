@@ -22,6 +22,8 @@ export interface CalculatorHost {
   autoKeyboard?: boolean;
   /** Tighter layout for small spaces (the Chrome toolbar popup is max 600px tall). */
   compact?: boolean;
+  /** Hide the window title bar (the page overlay draws its own draggable bar). */
+  hideTitleBar?: boolean;
 }
 
 const defaultHost: CalculatorHost = {

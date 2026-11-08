@@ -134,8 +134,9 @@ export default {
 				'scale-in': 'scale-in 0.5s ease-out'
 			},
 			fontFamily: {
-				sans: ["SF Pro Display", "SF Pro", "system-ui", "sans-serif"],
-				mono: ["SF Mono", "monospace"]
+				// System fonts: SF on Mac, Segoe UI on Windows, Roboto on Android/ChromeOS. No downloads.
+				sans: ["-apple-system", "BlinkMacSystemFont", "system-ui", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
+				mono: ["ui-monospace", "SF Mono", "Menlo", "Consolas", "monospace"]
 			}
 		}
 	},

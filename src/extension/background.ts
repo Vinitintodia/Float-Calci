@@ -1,5 +1,6 @@
 // Extension service worker (Manifest V3 background).
-// Opens the separate floating calculator window, and keeps only one of them.
+// Shows the floating calculator on the current page, or opens the separate
+// floating window (keeping only one of them).
 
 const WINDOW_KEY = "floatWindowId";
 
@@ -18,6 +19,18 @@ const openFloatingWindow = async (calc?: string) => {
   const win = await chrome.windows.create({ url, type: "popup", width: 400, height: 720, focused: true });
   await chrome.storage.session.set({ [WINDOW_KEY]: win.id });
 };
+
+// Clicking the toolbar icon (or Alt+Shift+C) puts a floating calculator on the
+// current page. Chrome doesn't allow that on its own pages (chrome://, the Web
+// Store, the new tab page), so there we open the separate floating window.
+chrome.action.onClicked.addListener(async (tab) => {
+  if (tab.id === undefined) return openFloatingWindow();
+  try {
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["assets/overlay.js"] });
+  } catch {
+    await openFloatingWindow();
+  }
+});
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg?.type === "open-floating-window") {

@@ -117,8 +117,14 @@ export const getVisibleEntries = (s: State = state) => {
   return s.entries.filter((e) => e.profileId === null || e.profileId === pid);
 };
 
-/** True when closing should ask the user to save (unsaved work and no profile). */
-export const shouldPromptToSave = () => !state.profile && getUnsavedCount() > 0;
+// "Not now": don't ask again until there are more unsaved calculations than this.
+let dismissedAtCount = 0;
+export const dismissSavePrompt = () => {
+  dismissedAtCount = getUnsavedCount();
+};
+
+/** True when closing should ask the user to save (new unsaved work and no profile). */
+export const shouldPromptToSave = () => !state.profile && getUnsavedCount() > dismissedAtCount;
 
 // ---- React hook ----------------------------------------------------------
 
