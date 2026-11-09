@@ -7,8 +7,8 @@ For using the extension, see [CHROME_EXTENSION_GUIDE.md](../CHROME_EXTENSION_GUI
 ## 1. Setup
 
 ```bash
-git clone https://github.com/Vinitintodia/voice-calc-vision.git
-cd voice-calc-vision
+git clone https://github.com/Vinitintodia/Float-Calci.git
+cd Float-Calci
 npm install
 npm run dev        # http://localhost:8080
 ```

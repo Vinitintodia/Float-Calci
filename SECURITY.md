@@ -82,5 +82,5 @@ the site rather than creating a bill.
 
 ## Reporting a problem
 
-Please open a [GitHub issue](https://github.com/Vinitintodia/voice-calc-vision/issues) without exploit details,
+Please open a [GitHub issue](https://github.com/Vinitintodia/Float-Calci/issues) without exploit details,
 or contact the maintainer privately first.

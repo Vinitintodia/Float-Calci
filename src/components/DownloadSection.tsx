@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { supportsAlwaysOnTop } from "@/lib/env";
 import { useInstall } from "@/lib/install";
 
-const REPO = "https://github.com/Vinitintodia/voice-calc-vision";
+const REPO = "https://github.com/Vinitintodia/Float-Calci";
 const GUIDE = `${REPO}/blob/main/CHROME_EXTENSION_GUIDE.md`;
 
 const scrollToDemo = () => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" });

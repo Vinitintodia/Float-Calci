@@ -1,7 +1,7 @@
 import React from "react";
 import { Github } from "lucide-react";
 
-const REPO = "https://github.com/Vinitintodia/voice-calc-vision";
+const REPO = "https://github.com/Vinitintodia/Float-Calci";
 
 const LINKS = [
   { label: "Features", href: "#features" },

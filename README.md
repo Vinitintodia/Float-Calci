@@ -30,8 +30,8 @@
 ## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/Vinitintodia/voice-calc-vision.git
-cd voice-calc-vision
+git clone https://github.com/Vinitintodia/Float-Calci.git
+cd Float-Calci
 npm install
 npm run dev
 ```

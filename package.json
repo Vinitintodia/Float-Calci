@@ -81,13 +81,13 @@
   "main": "eslint.config.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Vinitintodia/voice-calc-vision.git"
+    "url": "git+https://github.com/Vinitintodia/Float-Calci.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Vinitintodia/voice-calc-vision/issues"
+    "url": "https://github.com/Vinitintodia/Float-Calci/issues"
   },
-  "homepage": "https://github.com/Vinitintodia/voice-calc-vision#readme"
+  "homepage": "https://github.com/Vinitintodia/Float-Calci#readme"
 }
